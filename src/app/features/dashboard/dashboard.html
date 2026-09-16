@@ -1,0 +1,17 @@
+<div class="space-y-6">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @for (stat of stats; track stat.label) {
+      <app-stat-card [stat]="stat" />
+    }
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <app-entities-debt-list [entities]="entitiesWithHighestDebt" />
+    <app-payments-overview
+      [latestPayments]="latestPayments"
+      [overdueObligations]="overdueObligations"
+    />
+  </div>
+
+  <app-quick-actions [actions]="quickActions" />
+</div>

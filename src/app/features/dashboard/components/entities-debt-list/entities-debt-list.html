@@ -1,0 +1,19 @@
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-sm font-semibold text-slate-900">Entidades con Mayor Deuda</h2>
+
+  <ul class="mt-5 space-y-4">
+    @for (entity of entities(); track entity.name) {
+      <li>
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-medium text-slate-700">{{ entity.name }}</span>
+          <span class="text-slate-400">{{ entity.percentage }}%</span>
+        </div>
+        <div class="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div class="h-full rounded-full bg-slate-900" [style.width.%]="entity.percentage"></div>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <p class="mt-4 text-xs text-slate-400">% del total de cartera</p>
+</div>
