@@ -2,7 +2,7 @@ import { NavItem } from './nav-item.model';
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: 'layout-dashboard', implemented: true },
-  { label: 'Parametrización', path: '/parametrizacion', icon: 'settings' },
+  { label: 'Parametrización', path: '/parametrizacion', icon: 'settings', implemented: true },
   { label: 'Entidades', path: '/entidades', icon: 'building-2' },
   { label: 'Cartera', path: '/cartera', icon: 'wallet' },
   { label: 'Pagos', path: '/pagos', icon: 'credit-card' },

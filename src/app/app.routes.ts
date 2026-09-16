@@ -21,6 +21,11 @@ export const routes: Routes = [
         path: 'acuerdos',
         loadChildren: () => import('./features/acuerdos/acuerdos.routes').then((m) => m.ACUERDOS_ROUTES),
       },
+      {
+        path: 'parametrizacion',
+        loadChildren: () =>
+          import('./features/parametrizacion/parametrizacion.routes').then((m) => m.PARAMETRIZACION_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

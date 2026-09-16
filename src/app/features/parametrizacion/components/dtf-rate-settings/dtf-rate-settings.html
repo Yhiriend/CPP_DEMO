@@ -1,0 +1,124 @@
+<div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+  <div class="space-y-4 xl:col-span-2">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="relative min-w-[220px] max-w-sm flex-1">
+        <svg lucideSearch class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></svg>
+        <input
+          type="search"
+          name="dtfSearch"
+          placeholder="Buscar por código, periodo o usuario..."
+          class="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="search()"
+        />
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-medium text-slate-400">
+          {{ filteredRates().length }} {{ filteredRates().length === 1 ? 'registro encontrado' : 'registros encontrados' }}
+        </span>
+        <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="search()"
+        >
+          Buscar
+        </button>
+      </div>
+    </div>
+
+    <app-table title="Histórico de Tasas DTF" [columns]="columns" [rows]="filteredRates()">
+      <div table-actions>
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        >
+          <svg lucideDownload class="h-4 w-4"></svg>
+          Exportar Histórico (CSV/PDF)
+        </button>
+      </div>
+
+      <ng-template #rowActions let-row>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          [attr.aria-label]="'Editar ' + row.codigo"
+          [title]="'Editar ' + row.codigo"
+        >
+          <svg lucideSquarePen class="h-4 w-4"></svg>
+        </button>
+      </ng-template>
+    </app-table>
+  </div>
+
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-sm font-semibold text-slate-900">Registrar Nueva Tasa DTF</h2>
+    <p class="mt-1 text-sm text-slate-500">Complete los campos para crear un nuevo registro de tasa.</p>
+
+    <form class="mt-6 space-y-5" (ngSubmit)="submitNewRate()">
+      <div>
+        <label for="tasa" class="mb-1.5 block text-sm font-medium text-slate-700">Valor de la Tasa %*</label>
+        <div class="relative">
+          <input
+            id="tasa"
+            name="tasa"
+            type="number"
+            step="0.01"
+            placeholder="Ej. 11.82"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 pr-8 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="tasaValue"
+          />
+          <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-400">%</span>
+        </div>
+        <p class="mt-1.5 text-xs text-slate-400">Ingrese el valor porcentual de la tasa DTF del período.</p>
+      </div>
+
+      <div>
+        <label for="vigencia" class="mb-1.5 block text-sm font-medium text-slate-700">Vigencia Inicial*</label>
+        <input
+          id="vigencia"
+          name="vigencia"
+          type="date"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="vigenciaInicial"
+        />
+        <p class="mt-1.5 text-xs text-slate-400">Primer día del mes calendario al que aplica la tasa.</p>
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+
+      <div class="flex gap-2.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+        <svg lucideInfo class="h-4 w-4 shrink-0 text-slate-400"></svg>
+        <p>
+          El registro será auditado automáticamente con el usuario activo de la sesión y la marca de tiempo del
+          sistema al momento del guardado.
+        </p>
+      </div>
+
+      <dl class="space-y-1.5 border-t border-slate-100 pt-4 text-xs">
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-400">Módulo activo</dt>
+          <dd class="font-medium text-slate-600">2 — Parametrización</dd>
+        </div>
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-400">Sub-módulo</dt>
+          <dd class="font-medium text-slate-600">DTF Rate Settings</dd>
+        </div>
+        <div class="flex items-center justify-between">
+          <dt class="text-slate-400">Entorno</dt>
+          <dd class="font-medium text-slate-600">Producción — PRD</dd>
+        </div>
+      </dl>
+
+      <button
+        type="submit"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Registrar Nueva Tasa
+      </button>
+      <p class="text-center text-xs text-slate-400">Acción irreversible — revise los valores antes de confirmar.</p>
+    </form>
+  </div>
+</div>
