@@ -29,11 +29,19 @@
   </div>
 
   <app-table title="Directorio de Entidades Concurrentes" [columns]="columns" [rows]="filteredEntidades()">
-    <div table-actions>
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showBulkModal.set(true)"
+      >
+        <svg lucideUpload class="h-4 w-4"></svg>
+        Cargue Masivo
+      </button>
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-        (click)="crearEntidad()"
+        (click)="openCreateForm()"
       >
         <svg lucidePlus class="h-4 w-4"></svg>
         Crear Nueva Entidad
@@ -41,15 +49,131 @@
     </div>
 
     <ng-template #rowActions let-row>
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-        (click)="verDetalle(row)"
-      >
-        Ver Detalle
-      </button>
+      <div class="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          (click)="verDetalle(row)"
+        >
+          Ver Detalle
+        </button>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          [attr.aria-label]="'Editar ' + row.nombre"
+          [title]="'Editar ' + row.nombre"
+          (click)="openEditForm(row)"
+        >
+          <svg lucideSquarePen class="h-4 w-4"></svg>
+        </button>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-slate-100"
+          [class]="row.estado.label === 'Activa' ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'"
+          [attr.aria-label]="row.estado.label === 'Activa' ? 'Inactivar ' + row.nombre : 'Activar ' + row.nombre"
+          [title]="row.estado.label === 'Activa' ? 'Inactivar' : 'Activar'"
+          (click)="toggleEstado(row)"
+        >
+          @if (row.estado.label === 'Activa') {
+            <svg lucideCircleX class="h-4 w-4"></svg>
+          } @else {
+            <svg lucideCircleCheck class="h-4 w-4"></svg>
+          }
+        </button>
+      </div>
     </ng-template>
   </app-table>
 
   <app-system-status-bar />
 </div>
+
+@if (showFormModal()) {
+  <app-modal [title]="editingEntidad() ? 'Editar Entidad' : 'Crear Nueva Entidad'" (close)="showFormModal.set(false)">
+    <form modal-body class="space-y-4" (ngSubmit)="submitForm()">
+      <div>
+        <label for="entidadNit" class="mb-1.5 block text-sm font-medium text-slate-700">NIT*</label>
+        <input
+          id="entidadNit"
+          name="entidadNit"
+          type="text"
+          placeholder="900.123.456-7"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formNit"
+        />
+      </div>
+
+      <div>
+        <label for="entidadNombre" class="mb-1.5 block text-sm font-medium text-slate-700">Nombre*</label>
+        <input
+          id="entidadNombre"
+          name="entidadNombre"
+          type="text"
+          placeholder="Nombre de la entidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formNombre"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="entidadTipo" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo*</label>
+          <select
+            id="entidadTipo"
+            name="entidadTipo"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTipo"
+          >
+            <option value="" disabled>Seleccione...</option>
+            @for (tipo of tiposEntidad; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="entidadEstado" class="mb-1.5 block text-sm font-medium text-slate-700">Estado*</label>
+          <select
+            id="entidadEstado"
+            name="entidadEstado"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEstado"
+          >
+            <option value="Activa">Activa</option>
+            <option value="Inactiva">Inactiva</option>
+            <option value="Revisión">Revisión</option>
+          </select>
+        </div>
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </form>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        {{ editingEntidad() ? 'Guardar Cambios' : 'Crear Entidad' }}
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showBulkModal()) {
+  <app-bulk-upload-dialog
+    title="Cargue Masivo de Entidades"
+    [templateColumns]="bulkColumns"
+    [validate]="validateBulkRows"
+    (closed)="showBulkModal.set(false)"
+    (confirmed)="confirmBulkUpload($event)"
+  />
+}

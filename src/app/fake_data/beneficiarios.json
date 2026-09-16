@@ -1,0 +1,38 @@
+[
+  {
+    "id": "rosa-gomez-lopez",
+    "pensionadoId": "juan-perez-gomez",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "39.102.887",
+    "nombresApellidos": "Rosa Gómez López",
+    "parentesco": "Cónyuge",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "andres-perez-gomez",
+    "pensionadoId": "juan-perez-gomez",
+    "tipoDocumento": { "label": "T.I.", "variant": "neutral" },
+    "numeroDocumento": "1.098.765.432",
+    "nombresApellidos": "Andrés Pérez Gómez",
+    "parentesco": "Hijo/a",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "jorge-salinas-mora",
+    "pensionadoId": "maria-rodriguez-salinas",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "17.456.321",
+    "nombresApellidos": "Jorge Salinas Mora",
+    "parentesco": "Compañero(a) Permanente",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "luisa-fuentes-diaz",
+    "pensionadoId": "roberto-fuentes-diaz",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "45.678.912",
+    "nombresApellidos": "Luisa Fuentes Díaz",
+    "parentesco": "Hijo/a",
+    "estado": { "label": "Inactivo", "variant": "neutral" }
+  }
+]

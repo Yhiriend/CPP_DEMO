@@ -38,11 +38,19 @@
   </div>
 
   <app-table title="Directorio General de Pensionados" [columns]="columns" [rows]="filteredPensionados()">
-    <div table-actions>
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showBulkModal.set(true)"
+      >
+        <svg lucideUpload class="h-4 w-4"></svg>
+        Cargue Masivo
+      </button>
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-        (click)="crearPensionado()"
+        (click)="openCreateForm()"
       >
         <svg lucidePlus class="h-4 w-4"></svg>
         Crear Pensionado
@@ -50,13 +58,38 @@
     </div>
 
     <ng-template #rowActions let-row>
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-        (click)="verDetalle(row)"
-      >
-        Ver Detalle
-      </button>
+      <div class="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          (click)="verDetalle(row)"
+        >
+          Ver Detalle
+        </button>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          [attr.aria-label]="'Editar ' + row.nombresApellidos"
+          [title]="'Editar ' + row.nombresApellidos"
+          (click)="openEditForm(row)"
+        >
+          <svg lucideSquarePen class="h-4 w-4"></svg>
+        </button>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-slate-100"
+          [class]="row.estado.label === 'Activo' ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'"
+          [attr.aria-label]="row.estado.label === 'Activo' ? 'Inactivar ' + row.nombresApellidos : 'Activar ' + row.nombresApellidos"
+          [title]="row.estado.label === 'Activo' ? 'Inactivar' : 'Activar'"
+          (click)="toggleEstado(row)"
+        >
+          @if (row.estado.label === 'Activo') {
+            <svg lucideCircleX class="h-4 w-4"></svg>
+          } @else {
+            <svg lucideCircleCheck class="h-4 w-4"></svg>
+          }
+        </button>
+      </div>
     </ng-template>
   </app-table>
 
@@ -78,3 +111,116 @@
     <span class="ml-auto text-slate-400">Última sync: 2026-06-19 10:15:33</span>
   </div>
 </div>
+
+@if (showFormModal()) {
+  <app-modal
+    [title]="editingPensionado() ? 'Editar Pensionado' : 'Crear Pensionado'"
+    (close)="showFormModal.set(false)"
+  >
+    <form modal-body class="space-y-4" (ngSubmit)="submitForm()">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="pensTipoDoc" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo Doc.*</label>
+          <select
+            id="pensTipoDoc"
+            name="pensTipoDoc"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTipoDocumento"
+          >
+            @for (tipo of tiposDocumento; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="pensNumeroDoc" class="mb-1.5 block text-sm font-medium text-slate-700">
+            Número Documento*
+          </label>
+          <input
+            id="pensNumeroDoc"
+            name="pensNumeroDoc"
+            type="text"
+            placeholder="00.000.000"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formNumeroDocumento"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="pensNombres" class="mb-1.5 block text-sm font-medium text-slate-700">Nombres y Apellidos*</label>
+        <input
+          id="pensNombres"
+          name="pensNombres"
+          type="text"
+          placeholder="Nombre completo"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formNombres"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="pensEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">
+            Entidad Principal*
+          </label>
+          <select
+            id="pensEntidad"
+            name="pensEntidad"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEntidadId"
+          >
+            <option value="" disabled>Seleccione...</option>
+            @for (entidad of entidades(); track entidad.id) {
+              <option [value]="entidad.id">{{ entidad.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="pensEstado" class="mb-1.5 block text-sm font-medium text-slate-700">Estado*</label>
+          <select
+            id="pensEstado"
+            name="pensEstado"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEstado"
+          >
+            @for (estado of estadosPensionado; track estado) {
+              <option [value]="estado">{{ estado }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </form>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        {{ editingPensionado() ? 'Guardar Cambios' : 'Crear Pensionado' }}
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showBulkModal()) {
+  <app-bulk-upload-dialog
+    title="Cargue Masivo de Pensionados"
+    [templateColumns]="bulkColumns"
+    [validate]="validateBulkRows"
+    (closed)="showBulkModal.set(false)"
+    (confirmed)="confirmBulkUpload($event)"
+  />
+}

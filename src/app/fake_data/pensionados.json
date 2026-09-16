@@ -1,0 +1,47 @@
+[
+  {
+    "id": "juan-perez-gomez",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "19.876.543",
+    "nombresApellidos": "Juan Pérez Gómez",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidadPrincipal": "Gobernación de Ejemplo",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "maria-rodriguez-salinas",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "52.341.871",
+    "nombresApellidos": "María Rodríguez Salinas",
+    "entidadId": "alcaldia-municipal-de-muestra",
+    "entidadPrincipal": "Alcaldía Municipal de Muestra",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "carlos-herrera-mendoza",
+    "tipoDocumento": { "label": "C.E.", "variant": "neutral" },
+    "numeroDocumento": "00.847.236",
+    "nombresApellidos": "Carlos Herrera Mendoza",
+    "entidadId": "instituto-distrital-de-prueba",
+    "entidadPrincipal": "Instituto Distrital de Prueba",
+    "estado": { "label": "Suspendido", "variant": "warning" }
+  },
+  {
+    "id": "ana-lucia-torres-vega",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "41.203.658",
+    "nombresApellidos": "Ana Lucía Torres Vega",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidadPrincipal": "Gobernación de Ejemplo",
+    "estado": { "label": "Activo", "variant": "success" }
+  },
+  {
+    "id": "roberto-fuentes-diaz",
+    "tipoDocumento": { "label": "C.C.", "variant": "neutral" },
+    "numeroDocumento": "80.456.120",
+    "nombresApellidos": "Roberto Fuentes Díaz",
+    "entidadId": "secretaria-ejemplo-norte",
+    "entidadPrincipal": "Secretaría Ejemplo Norte",
+    "estado": { "label": "Fallecido", "variant": "neutral" }
+  }
+]

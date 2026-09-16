@@ -1,0 +1,142 @@
+<div>
+  <app-table title="Beneficiarios" [columns]="columns" [rows]="beneficiarios()">
+    <div table-actions>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="openCreateForm()"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Agregar Beneficiario
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <div class="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          [attr.aria-label]="'Editar ' + row.nombresApellidos"
+          [title]="'Editar ' + row.nombresApellidos"
+          (click)="openEditForm(row)"
+        >
+          <svg lucideSquarePen class="h-4 w-4"></svg>
+        </button>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-slate-100"
+          [class]="row.estado.label === 'Activo' ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'"
+          [attr.aria-label]="row.estado.label === 'Activo' ? 'Inactivar ' + row.nombresApellidos : 'Activar ' + row.nombresApellidos"
+          [title]="row.estado.label === 'Activo' ? 'Inactivar' : 'Activar'"
+          (click)="toggleEstado(row)"
+        >
+          @if (row.estado.label === 'Activo') {
+            <svg lucideCircleX class="h-4 w-4"></svg>
+          } @else {
+            <svg lucideCircleCheck class="h-4 w-4"></svg>
+          }
+        </button>
+      </div>
+    </ng-template>
+  </app-table>
+</div>
+
+@if (showFormModal()) {
+  <app-modal
+    [title]="editingBeneficiario() ? 'Editar Beneficiario' : 'Agregar Beneficiario'"
+    (close)="showFormModal.set(false)"
+  >
+    <form modal-body class="space-y-4" (ngSubmit)="submitForm()">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="benTipoDoc" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo Doc.*</label>
+          <select
+            id="benTipoDoc"
+            name="benTipoDoc"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTipoDocumento"
+          >
+            @for (tipo of tiposDocumento; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="benNumeroDoc" class="mb-1.5 block text-sm font-medium text-slate-700">
+            Número Documento*
+          </label>
+          <input
+            id="benNumeroDoc"
+            name="benNumeroDoc"
+            type="text"
+            placeholder="00.000.000"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formNumeroDocumento"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="benNombres" class="mb-1.5 block text-sm font-medium text-slate-700">Nombres y Apellidos*</label>
+        <input
+          id="benNombres"
+          name="benNombres"
+          type="text"
+          placeholder="Nombre completo"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formNombres"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="benParentesco" class="mb-1.5 block text-sm font-medium text-slate-700">Parentesco*</label>
+          <select
+            id="benParentesco"
+            name="benParentesco"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formParentesco"
+          >
+            @for (parentesco of parentescos; track parentesco) {
+              <option [value]="parentesco">{{ parentesco }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="benEstado" class="mb-1.5 block text-sm font-medium text-slate-700">Estado*</label>
+          <select
+            id="benEstado"
+            name="benEstado"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEstado"
+          >
+            @for (estado of estadosBeneficiario; track estado) {
+              <option [value]="estado">{{ estado }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </form>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        {{ editingBeneficiario() ? 'Guardar Cambios' : 'Agregar Beneficiario' }}
+      </button>
+    </div>
+  </app-modal>
+}

@@ -1,0 +1,40 @@
+{
+  "gobernacion-de-ejemplo": [
+    {
+      "id": "OBL-2024-0001",
+      "periodo": "Enero 2024",
+      "capitalAdeudado": 84200000,
+      "capitalAdeudadoLabel": "$84,200,000",
+      "interesesGenerados": 9620000,
+      "interesesGeneradosLabel": "$9,620,000",
+      "estadoPago": { "label": "Vencida", "variant": "warning" }
+    },
+    {
+      "id": "OBL-2024-0002",
+      "periodo": "Febrero 2024",
+      "capitalAdeudado": 84200000,
+      "capitalAdeudadoLabel": "$84,200,000",
+      "interesesGenerados": 9240000,
+      "interesesGeneradosLabel": "$9,240,000",
+      "estadoPago": { "label": "Vencida", "variant": "warning" }
+    },
+    {
+      "id": "OBL-2024-0003",
+      "periodo": "Marzo 2024",
+      "capitalAdeudado": 84200000,
+      "capitalAdeudadoLabel": "$84,200,000",
+      "interesesGenerados": 8810000,
+      "interesesGeneradosLabel": "$8,810,000",
+      "estadoPago": { "label": "Pendiente", "variant": "neutral" }
+    },
+    {
+      "id": "OBL-2024-0004",
+      "periodo": "Abril 2024",
+      "capitalAdeudado": 84200000,
+      "capitalAdeudadoLabel": "$84,200,000",
+      "interesesGenerados": 8400000,
+      "interesesGeneradosLabel": "$8,400,000",
+      "estadoPago": { "label": "Al Día", "variant": "success" }
+    }
+  ]
+}
