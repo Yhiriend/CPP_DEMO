@@ -5,6 +5,7 @@ import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { PagoRecibido } from './models/pago.model';
 import { PAGOS_TABS, PagoTabId } from './pagos-tabs';
 import { PagosService } from './pagos.service';
@@ -16,6 +17,7 @@ import { PagosService } from './pagos.service';
 })
 export class Pagos {
   private readonly pagosService = inject(PagosService);
+  private readonly toastService = inject(ToastService);
 
   protected readonly kpis = this.pagosService.getKpis();
   protected readonly tabs = PAGOS_TABS;
@@ -47,5 +49,21 @@ export class Pagos {
 
   protected selectTab(tabId: PagoTabId): void {
     this.activeTabId.set(tabId);
+  }
+
+  protected buscar(): void {
+    this.toastService.show('Los filtros avanzados estarán disponibles próximamente.');
+  }
+
+  protected exportar(): void {
+    this.toastService.show('La exportación a CSV estará disponible próximamente.');
+  }
+
+  protected registrarPago(): void {
+    this.toastService.show('Registrar un pago estará disponible cuando el backend esté conectado.');
+  }
+
+  protected verDetalle(pago: PagoRecibido): void {
+    this.toastService.show(`El detalle de ${pago.idTransaccion} estará disponible próximamente.`);
   }
 }

@@ -4,6 +4,7 @@ import { LucideDownload, LucideExternalLink, LucideSlidersHorizontal } from '@lu
 
 import { Table } from '../../../../shared/ui/table/table';
 import { TableColumn } from '../../../../shared/ui/table/table.model';
+import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { CarteraService } from '../../cartera.service';
 import { CarteraPorEntidad } from '../../models/cartera.model';
 
@@ -15,6 +16,7 @@ import { CarteraPorEntidad } from '../../models/cartera.model';
 export class EstadoCuentaGeneral {
   private readonly carteraService = inject(CarteraService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   protected readonly columns: TableColumn<CarteraPorEntidad>[] = [
     { key: 'nit', header: 'NIT' },
@@ -47,6 +49,18 @@ export class EstadoCuentaGeneral {
 
   protected verFicha(fila: CarteraPorEntidad): void {
     this.router.navigate(['/entidades', fila.entidadId]);
+  }
+
+  protected aplicarFiltros(): void {
+    this.toastService.show('Los filtros avanzados estarán disponibles próximamente.');
+  }
+
+  protected limpiarFiltros(): void {
+    this.toastService.show('Los filtros avanzados estarán disponibles próximamente.');
+  }
+
+  protected exportar(): void {
+    this.toastService.show('La exportación a Excel/PDF estará disponible próximamente.');
   }
 
   private formatTotal(value: number): string {

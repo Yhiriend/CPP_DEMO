@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LucideArrowRight, LucideEye, LucideEyeOff, LucideLock, LucideShieldCheck } from '@lucide/angular';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { ToastService } from '../../../shared/ui/toast/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   protected username = '';
   protected password = '';
@@ -33,5 +35,9 @@ export class Login {
 
   protected togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  protected forgotPassword(): void {
+    this.toastService.show('La recuperación de contraseña estará disponible próximamente.');
   }
 }

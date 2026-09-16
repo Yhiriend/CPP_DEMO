@@ -7,6 +7,7 @@ import { Breadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { SystemStatusBar } from '../../../shared/ui/system-status-bar/system-status-bar';
 import { Table } from '../../../shared/ui/table/table';
 import { TableColumn } from '../../../shared/ui/table/table.model';
+import { ToastService } from '../../../shared/ui/toast/toast.service';
 import { EntidadesService } from '../entidades.service';
 import { Entidad } from '../models/entidad.model';
 
@@ -18,6 +19,7 @@ import { Entidad } from '../models/entidad.model';
 export class EntidadesList {
   private readonly entidadesService = inject(EntidadesService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   protected readonly columns: TableColumn<Entidad>[] = [
     { key: 'codigoNit', header: 'Código / NIT' },
@@ -49,5 +51,9 @@ export class EntidadesList {
 
   protected verDetalle(entidad: Entidad): void {
     this.router.navigate(['/entidades', entidad.id]);
+  }
+
+  protected crearEntidad(): void {
+    this.toastService.show('Crear una nueva entidad estará disponible cuando el backend esté conectado.');
   }
 }

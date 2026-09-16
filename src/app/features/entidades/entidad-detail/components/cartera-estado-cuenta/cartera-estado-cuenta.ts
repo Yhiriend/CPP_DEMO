@@ -3,6 +3,7 @@ import { LucideDownload, LucideSlidersHorizontal } from '@lucide/angular';
 
 import { Table } from '../../../../../shared/ui/table/table';
 import { TableColumn } from '../../../../../shared/ui/table/table.model';
+import { ToastService } from '../../../../../shared/ui/toast/toast.service';
 import { EntidadesService } from '../../../entidades.service';
 import { ObligacionCartera } from '../../../models/entidad.model';
 
@@ -13,6 +14,7 @@ import { ObligacionCartera } from '../../../models/entidad.model';
 })
 export class CarteraEstadoCuenta {
   private readonly entidadesService = inject(EntidadesService);
+  private readonly toastService = inject(ToastService);
 
   readonly entidadId = input.required<string>();
 
@@ -54,4 +56,12 @@ export class CarteraEstadoCuenta {
 
     return `${vencidas} vencidas · ${pendientes} pendiente · ${alDia} al día`;
   });
+
+  protected filtrar(): void {
+    this.toastService.show('Los filtros avanzados estarán disponibles próximamente.');
+  }
+
+  protected exportar(): void {
+    this.toastService.show('La exportación a PDF estará disponible próximamente.');
+  }
 }

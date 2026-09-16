@@ -28,6 +28,7 @@
     <button
       type="button"
       class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
     >
       Buscar
     </button>
@@ -39,6 +40,7 @@
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="generarLiquidacion()"
       >
         <svg lucidePlus class="h-4 w-4"></svg>
         Generar Liquidación
@@ -49,6 +51,7 @@
       <button
         type="button"
         class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verDetalle(row)"
       >
         Ver Detalle
       </button>

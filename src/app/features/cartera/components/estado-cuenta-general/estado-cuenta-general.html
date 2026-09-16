@@ -15,12 +15,17 @@
     <button
       type="button"
       class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="aplicarFiltros()"
     >
       Aplicar Filtros
     </button>
     <div class="ml-auto flex items-center gap-3 text-xs text-slate-400">
       <span>{{ filasCartera.length }} entidades</span>
-      <button type="button" class="font-medium text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline">
+      <button
+        type="button"
+        class="font-medium text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+        (click)="limpiarFiltros()"
+      >
         Limpiar filtros
       </button>
     </div>
@@ -32,6 +37,7 @@
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="exportar()"
       >
         <svg lucideDownload class="h-4 w-4"></svg>
         Exportar Estado de Cuenta (Excel/PDF)

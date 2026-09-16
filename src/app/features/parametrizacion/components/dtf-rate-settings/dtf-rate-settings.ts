@@ -4,6 +4,7 @@ import { LucideDownload, LucideInfo, LucidePlus, LucideSearch, LucideSquarePen }
 
 import { Table } from '../../../../shared/ui/table/table';
 import { TableColumn } from '../../../../shared/ui/table/table.model';
+import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { DtfRate } from '../../models/dtf-rate.model';
 import { ParametrizacionService } from '../../parametrizacion.service';
 
@@ -14,6 +15,7 @@ import { ParametrizacionService } from '../../parametrizacion.service';
 })
 export class DtfRateSettings {
   private readonly parametrizacionService = inject(ParametrizacionService);
+  private readonly toastService = inject(ToastService);
 
   protected readonly columns: TableColumn<DtfRate>[] = [
     { key: 'codigo', header: 'Código' },
@@ -65,5 +67,14 @@ export class DtfRateSettings {
     this.formError = '';
     this.tasaValue = null;
     this.vigenciaInicial = '';
+    this.toastService.show('Tasa DTF registrada correctamente.');
+  }
+
+  protected exportarHistorico(): void {
+    this.toastService.show('La exportación a CSV/PDF estará disponible próximamente.');
+  }
+
+  protected editarTasa(rate: DtfRate): void {
+    this.toastService.show(`Editar ${rate.codigo} estará disponible próximamente.`);
   }
 }

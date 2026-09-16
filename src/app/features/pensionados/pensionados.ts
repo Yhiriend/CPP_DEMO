@@ -5,6 +5,7 @@ import { LucidePlus } from '@lucide/angular';
 import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { Pensionado } from './models/pensionado.model';
 import { PensionadosService } from './pensionados.service';
 
@@ -15,6 +16,7 @@ import { PensionadosService } from './pensionados.service';
 })
 export class Pensionados {
   private readonly pensionadosService = inject(PensionadosService);
+  private readonly toastService = inject(ToastService);
 
   protected readonly columns: TableColumn<Pensionado>[] = [
     { key: 'tipoDocumento', header: 'Tipo Doc.' },
@@ -45,5 +47,13 @@ export class Pensionados {
   protected search(): void {
     this.appliedDocumento.set(this.documentoBusqueda);
     this.appliedNombre.set(this.nombreBusqueda);
+  }
+
+  protected crearPensionado(): void {
+    this.toastService.show('Crear un nuevo pensionado estará disponible cuando el backend esté conectado.');
+  }
+
+  protected verDetalle(pensionado: Pensionado): void {
+    this.toastService.show(`El detalle de ${pensionado.nombresApellidos} estará disponible próximamente.`);
   }
 }

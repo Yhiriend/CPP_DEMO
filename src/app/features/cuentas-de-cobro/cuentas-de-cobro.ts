@@ -4,6 +4,7 @@ import { LucideDownload, LucidePlus } from '@lucide/angular';
 import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { CuentasDeCobroService } from './cuentas-de-cobro.service';
 import { CuentaCobro } from './models/cuenta-cobro.model';
 
@@ -14,6 +15,7 @@ import { CuentaCobro } from './models/cuenta-cobro.model';
 })
 export class CuentasDeCobro {
   private readonly cuentasDeCobroService = inject(CuentasDeCobroService);
+  private readonly toastService = inject(ToastService);
 
   protected readonly cuentasCobro = this.cuentasDeCobroService.getCuentasCobro();
 
@@ -35,6 +37,22 @@ export class CuentasDeCobro {
   );
 
   protected readonly resumenEstados = this.buildResumenEstados();
+
+  protected buscar(): void {
+    this.toastService.show('Los filtros avanzados estarán disponibles próximamente.');
+  }
+
+  protected exportar(): void {
+    this.toastService.show('La exportación a CSV estará disponible próximamente.');
+  }
+
+  protected generarCuenta(): void {
+    this.toastService.show('Generar una cuenta de cobro estará disponible cuando el backend esté conectado.');
+  }
+
+  protected verCuenta(cuenta: CuentaCobro): void {
+    this.toastService.show(`El detalle de ${cuenta.idCuenta} estará disponible próximamente.`);
+  }
 
   private formatTotal(value: number): string {
     return `$${value.toLocaleString('en-US')}`;
