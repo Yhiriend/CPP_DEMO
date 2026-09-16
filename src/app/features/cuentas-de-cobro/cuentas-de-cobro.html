@@ -178,11 +178,11 @@
         @if (formEntidadId) {
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">Liquidaciones a incluir*</label>
-            @if (liquidacionesEntidadSeleccionada().length === 0) {
+            @if (liquidacionesEntidadSeleccionada.length === 0) {
               <p class="text-xs text-amber-600">Esta entidad no tiene liquidaciones disponibles sin facturar.</p>
             }
             <div class="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-3">
-              @for (liquidacion of liquidacionesEntidadSeleccionada(); track liquidacion.idLiquidacion) {
+              @for (liquidacion of liquidacionesEntidadSeleccionada; track liquidacion.idLiquidacion) {
                 <label class="flex items-center gap-2 text-sm text-slate-700">
                   <input
                     type="checkbox"

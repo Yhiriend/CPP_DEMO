@@ -16,6 +16,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 import { todayIso } from '../../shared/utils/date';
 import { BeneficiariosService } from '../pensionados/beneficiarios.service';
 import { EntidadesService } from '../entidades/entidades.service';
+import { ImputacionesService } from '../imputaciones/imputaciones.service';
 import { LiquidacionesService } from '../liquidaciones/liquidaciones.service';
 import { CuentasDeCobroService } from './cuentas-de-cobro.service';
 import {
@@ -35,7 +36,7 @@ interface CuentaCobroRow extends CuentaCobro {
   readonly fechaVencimientoLabel: string;
 }
 
-const ESTADOS_FILTRO: readonly EstadoCuentaCobro[] = ['Borrador', 'Pendiente', 'Radicada', 'Vencida', 'Anulada'];
+const ESTADOS_FILTRO: readonly EstadoCuentaCobro[] = ['Borrador', 'Pendiente', 'Radicada', 'Vencida', 'Pagada', 'Anulada'];
 
 @Component({
   selector: 'app-cuentas-de-cobro',
@@ -47,6 +48,7 @@ export class CuentasDeCobro {
   private readonly entidadesService = inject(EntidadesService);
   private readonly liquidacionesService = inject(LiquidacionesService);
   private readonly beneficiariosService = inject(BeneficiariosService);
+  private readonly imputacionesService = inject(ImputacionesService);
   private readonly toastService = inject(ToastService);
 
   protected readonly entidades = this.entidadesService.entidades;
@@ -108,7 +110,7 @@ export class CuentasDeCobro {
   protected readonly resumenEstados = computed(() => {
     const cuentas = this.filteredCuentas();
     const conteo = (estado: EstadoCuentaCobro) => cuentas.filter((c) => c.estadoVisual.label === estado).length;
-    return `${conteo('Radicada')} radicada · ${conteo('Pendiente')} pendiente · ${conteo('Vencida')} vencida · ${conteo('Borrador')} borrador · ${conteo('Anulada')} anulada`;
+    return `${conteo('Radicada')} radicada · ${conteo('Pendiente')} pendiente · ${conteo('Vencida')} vencida · ${conteo('Pagada')} pagada · ${conteo('Borrador')} borrador · ${conteo('Anulada')} anulada`;
   });
 
   // --- Exportar ---
@@ -157,9 +159,10 @@ export class CuentasDeCobro {
     return this.liquidacionesService.liquidaciones().filter((l) => !facturadas.has(l.idLiquidacion));
   });
 
-  protected readonly liquidacionesEntidadSeleccionada = computed(() =>
-    this.liquidacionesDisponibles().filter((l) => l.entidadId === this.formEntidadId),
-  );
+  /** Getter (no `computed`) porque formEntidadId es un campo plano de ngModel, no un signal. */
+  protected get liquidacionesEntidadSeleccionada() {
+    return this.liquidacionesDisponibles().filter((l) => l.entidadId === this.formEntidadId);
+  }
 
   protected openGenerarModal(): void {
     this.formTipo = 'Individual';
@@ -182,7 +185,7 @@ export class CuentasDeCobro {
     if (this.formTipo === 'Individual') {
       return this.liquidacionesDisponibles().find((l) => l.idLiquidacion === this.formLiquidacionId)?.capital ?? 0;
     }
-    return this.liquidacionesEntidadSeleccionada()
+    return this.liquidacionesEntidadSeleccionada
       .filter((l) => this.formLiquidacionIdsConsolidada.has(l.idLiquidacion))
       .reduce((sum, l) => sum + l.capital, 0);
   }
@@ -321,9 +324,14 @@ export class CuentasDeCobro {
 
   private toRow(cuenta: CuentaCobro): CuentaCobroRow {
     const { interes, interesLabel } = this.cuentasDeCobroService.calcularInteresesCuenta(cuenta);
+    const estadoBase = this.cuentasDeCobroService.estadoVisual(cuenta);
+    const estadoVisual: TableBadge =
+      cuenta.estado.label !== 'Anulada' && this.imputacionesService.estaCubierta(cuenta)
+        ? { label: 'Pagada', variant: 'success' }
+        : estadoBase;
     return {
       ...cuenta,
-      estadoVisual: this.cuentasDeCobroService.estadoVisual(cuenta),
+      estadoVisual,
       interesesLabel: interesLabel,
       valorTotalLabel: this.formatCurrency(cuenta.capital + interes),
       pensionadosLabel: cuenta.pensionados.length === 1 ? cuenta.pensionados[0] : `${cuenta.pensionados.length} pensionados`,

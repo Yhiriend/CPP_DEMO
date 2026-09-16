@@ -21,6 +21,7 @@ const ESTADO_VARIANT: Record<EstadoCuentaCobro, TableBadgeVariant> = {
   Pendiente: 'warning',
   Radicada: 'success',
   Vencida: 'danger',
+  Pagada: 'success',
   Anulada: 'neutral',
 };
 

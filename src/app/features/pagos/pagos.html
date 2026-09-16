@@ -1,24 +1,15 @@
 <div class="space-y-6">
   <app-breadcrumb [items]="['SGDP', 'Pagos']" />
 
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <span
-        class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-slate-500"
-      >
-        Módulo 8
-      </span>
-      <h1 class="mt-2 text-lg font-semibold text-slate-900">Consultar Pagos</h1>
-    </div>
-    <span
-      class="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200"
-    >
-      Corte: 2026-06-19
-    </span>
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Pagos Recibidos</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Registro de recaudos de las entidades concurrentes, su fuente de pago y disponibilidad para imputación.
+    </p>
   </div>
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    @for (kpi of kpis; track kpi.label) {
+    @for (kpi of kpis(); track kpi.label) {
       <app-stat-card [stat]="kpi" />
     }
   </div>
@@ -44,20 +35,32 @@
 
   <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
     <span class="text-sm font-medium text-slate-600">Filtros:</span>
-    <select
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
-    >
-      <option>Todas las entidades</option>
-    </select>
-    <select
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
-    >
-      <option>Cualquier origen</option>
-    </select>
     <input
-      type="date"
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+      type="search"
+      name="pagoSearch"
+      placeholder="ID o entidad"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="buscar()"
     />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterOrigen"
+    >
+      <option value="">Cualquier fuente</option>
+      @for (fuente of fuentesPago; track fuente) {
+        <option [value]="fuente">{{ fuente }}</option>
+      }
+    </select>
     <button
       type="button"
       class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
@@ -83,7 +86,7 @@
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-        (click)="registrarPago()"
+        (click)="openFormModal()"
       >
         <svg lucidePlus class="h-4 w-4"></svg>
         Registrar Pago
@@ -113,3 +116,207 @@
     </div>
   }
 </div>
+
+@if (showFormModal()) {
+  <app-modal title="Registrar Pago" (close)="showFormModal.set(false)">
+    <form modal-body class="space-y-4" (ngSubmit)="submitForm()">
+      <div>
+        <label for="pagoEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Entidad*</label>
+        <select
+          id="pagoEntidad"
+          name="pagoEntidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formEntidadId"
+        >
+          <option value="" disabled>Seleccione...</option>
+          @for (entidad of entidades(); track entidad.id) {
+            <option [value]="entidad.id">{{ entidad.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (formEntidadId) {
+        <div>
+          <label for="pagoCuenta" class="mb-1.5 block text-sm font-medium text-slate-700">
+            Obligación Asociada (opcional)
+          </label>
+          <select
+            id="pagoCuenta"
+            name="pagoCuenta"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formCuentaCobroId"
+          >
+            <option value="">Sin identificar</option>
+            @for (cuenta of cuentasDeLaEntidad; track cuenta.idCuenta) {
+              <option [value]="cuenta.idCuenta">{{ cuenta.idCuenta }} — {{ cuenta.capitalLabel }}</option>
+            }
+          </select>
+          <p class="mt-1.5 text-xs text-slate-400">
+            Si no se identifica una obligación, el pago quedará marcado como "Sin Identificar" (CCAL-023).
+          </p>
+        </div>
+      }
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="pagoOrigen" class="mb-1.5 block text-sm font-medium text-slate-700">Fuente de Pago*</label>
+          <select
+            id="pagoOrigen"
+            name="pagoOrigen"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formOrigen"
+          >
+            @for (fuente of fuentesPago; track fuente) {
+              <option [value]="fuente">{{ fuente }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="pagoTipo" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo*</label>
+          <select
+            id="pagoTipo"
+            name="pagoTipo"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTipo"
+          >
+            @for (tipo of tiposPago; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="pagoMonto" class="mb-1.5 block text-sm font-medium text-slate-700">Monto Recibido*</label>
+          <input
+            id="pagoMonto"
+            name="pagoMonto"
+            type="number"
+            min="0"
+            placeholder="0"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formMonto"
+          />
+        </div>
+        <div>
+          <label for="pagoFecha" class="mb-1.5 block text-sm font-medium text-slate-700">Fecha*</label>
+          <input
+            id="pagoFecha"
+            name="pagoFecha"
+            type="date"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formFecha"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="pagoSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="pagoSoporte"
+          name="pagoSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onSoporteSelected($event)"
+        />
+        @if (formSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ formSoporteNombre }}</p>
+        }
+      </div>
+
+      @if (excedenteAdvertencia; as advertencia) {
+        <p class="text-sm font-medium text-amber-600">{{ advertencia }}</p>
+      }
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </form>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        Registrar Pago
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showDetalleModal() && detallePago(); as pago) {
+  <app-modal [title]="'Pago ' + pago.idTransaccion" (close)="showDetalleModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad</p>
+          <p class="font-medium text-slate-900">{{ pago.entidad }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fuente</p>
+          <p class="font-medium text-slate-900">{{ pago.origen.label }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Tipo</p>
+          <p class="font-medium text-slate-900">{{ pago.tipo }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fecha</p>
+          <p class="font-medium text-slate-900">{{ pago.fecha }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Obligación Asociada</p>
+          <p class="font-medium text-slate-900">{{ pago.cuentaCobroId ?? '— Sin identificar —' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Soporte</p>
+          <p class="font-medium text-slate-900">{{ pago.soporte?.nombreArchivo ?? '—' }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-1 rounded-lg bg-slate-50 px-4 py-3">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Monto Recibido</span>
+          <span class="font-semibold text-slate-900">{{ pago.montoRecibidoLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Disponible por Imputar</span>
+          <span class="font-semibold text-slate-900">{{ pago.montoDisponibleLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Estado</span>
+          <span class="font-semibold text-slate-900">{{ pago.estadoDerivado.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showDetalleModal.set(false)"
+      >
+        Cerrar
+      </button>
+      @if (pago.cuentaCobroId && pago.montoDisponible > 0) {
+        <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="irAImputar()"
+        >
+          Ir a Imputar
+        </button>
+      }
+    </div>
+  </app-modal>
+}

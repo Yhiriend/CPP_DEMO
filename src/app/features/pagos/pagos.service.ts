@@ -1,59 +1,53 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
-import { StatCardData } from '../../shared/ui/stat-card/stat-card.model';
-import { PAGOS_RECIBIDOS } from './data/pagos-mock.data';
-import { PagoRecibido } from './models/pago.model';
-import { PagoTabId } from './pagos-tabs';
+import PAGOS_SEED from '../../fake_data/pagos.json';
+import { EntidadesService } from '../entidades/entidades.service';
+import { PagoFormValue, PagoRecibido } from './models/pago.model';
 
-/** Backed by mock data for now; swap for an HTTP call once the API is ready. */
+const SESSION_USER = 'admin@sgdp.gov.co';
+
+/** Backed by mock data for now; swap for an HTTP-backed store once the API is ready. */
 @Injectable({ providedIn: 'root' })
 export class PagosService {
-  getPagosPorTab(tabId: PagoTabId): readonly PagoRecibido[] {
-    switch (tabId) {
-      case 'pendientes':
-        return PAGOS_RECIBIDOS.filter((pago) => pago.estado.label === 'Pend. Aplicar');
-      case 'aplicados':
-        return PAGOS_RECIBIDOS.filter((pago) => pago.estado.label === 'Aplicado');
-      case 'fonpet':
-        return PAGOS_RECIBIDOS.filter((pago) => pago.origen.label === 'FONPET');
-      case 'recursos-propios':
-        return PAGOS_RECIBIDOS.filter((pago) => pago.origen.label === 'Recursos Propios');
-      case 'todos':
-        return PAGOS_RECIBIDOS;
-    }
+  private readonly entidadesService = inject(EntidadesService);
+
+  private readonly _pagos = signal<PagoRecibido[]>(PAGOS_SEED as PagoRecibido[]);
+  readonly pagos = this._pagos.asReadonly();
+
+  private correlativo = this._pagos().length;
+
+  getById(idTransaccion: string): PagoRecibido | undefined {
+    return this._pagos().find((pago) => pago.idTransaccion === idTransaccion);
   }
 
-  getKpis(): readonly StatCardData[] {
-    const pendientes = PAGOS_RECIBIDOS.filter((pago) => pago.estado.label === 'Pend. Aplicar');
-    const aplicados = PAGOS_RECIBIDOS.filter((pago) => pago.estado.label === 'Aplicado');
-    const enRevision = PAGOS_RECIBIDOS.filter((pago) => pago.estado.label === 'En Revisión');
+  /** HU-012/013/014 — registra un pago recibido, ya con su fuente (HU-014) y, si aplica, la obligación identificada. */
+  registrarPago(value: PagoFormValue): PagoRecibido {
+    const entidad = this.entidadesService.getEntidadById(value.entidadId);
 
-    return [
-      {
-        label: 'Total Recibido (Mes)',
-        value: this.formatTotal(PAGOS_RECIBIDOS),
-        subtitle: `${PAGOS_RECIBIDOS.length} transacciones`,
-      },
-      {
-        label: 'Pendiente de Aplicar',
-        value: this.formatTotal(pendientes),
-        subtitle: `${pendientes.length} transacciones`,
-      },
-      {
-        label: 'Total Aplicado',
-        value: this.formatTotal(aplicados),
-        subtitle: `${aplicados.length} transacciones`,
-      },
-      {
-        label: 'En Revisión',
-        value: this.formatTotal(enRevision),
-        subtitle: `${enRevision.length} ${enRevision.length === 1 ? 'transacción' : 'transacciones'}`,
-      },
-    ];
+    const nuevo: PagoRecibido = {
+      idTransaccion: this.nextId(),
+      entidadId: value.entidadId,
+      entidad: entidad?.nombre ?? value.entidadId,
+      cuentaCobroId: value.cuentaCobroId,
+      origen: { label: value.origen, variant: 'neutral' },
+      tipo: value.tipo,
+      montoRecibido: value.montoRecibido,
+      montoRecibidoLabel: this.formatCurrency(value.montoRecibido),
+      fecha: value.fecha,
+      soporte: value.soporte,
+      creadoPor: SESSION_USER,
+    };
+
+    this._pagos.update((list) => [nuevo, ...list]);
+    return nuevo;
   }
 
-  private formatTotal(pagos: readonly PagoRecibido[]): string {
-    const total = pagos.reduce((sum, pago) => sum + pago.montoRecibido, 0);
-    return `$${total.toLocaleString('en-US')}`;
+  private nextId(): string {
+    this.correlativo += 1;
+    return `PAG-${new Date().getFullYear()}-${String(this.correlativo).padStart(3, '0')}`;
+  }
+
+  private formatCurrency(value: number): string {
+    return `$${value.toLocaleString('en-US')}`;
   }
 }

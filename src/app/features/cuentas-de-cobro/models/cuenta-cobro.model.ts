@@ -1,6 +1,6 @@
 import { TableBadge } from '../../../shared/ui/table/table.model';
 
-export type EstadoCuentaCobro = 'Borrador' | 'Pendiente' | 'Radicada' | 'Vencida' | 'Anulada';
+export type EstadoCuentaCobro = 'Borrador' | 'Pendiente' | 'Radicada' | 'Vencida' | 'Pagada' | 'Anulada';
 export type TipoCuentaCobro = 'Individual' | 'Consolidada';
 
 export const ESTADOS_CUENTA_COBRO_GENERABLES: readonly EstadoCuentaCobro[] = ['Borrador', 'Pendiente'];

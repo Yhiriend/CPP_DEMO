@@ -1,0 +1,67 @@
+[
+  {
+    "idTransaccion": "PAG-2026-041",
+    "entidadId": "municipio-piloto-del-sur",
+    "entidad": "Municipio Piloto del Sur",
+    "cuentaCobroId": null,
+    "origen": { "label": "FONPET", "variant": "neutral" },
+    "tipo": "Total",
+    "montoRecibido": 18900000,
+    "montoRecibidoLabel": "$18,900,000",
+    "fecha": "2026-02-22",
+    "soporte": null,
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idTransaccion": "PAG-2026-042",
+    "entidadId": "secretaria-ejemplo-norte",
+    "entidad": "Secretaría Ejemplo Norte",
+    "cuentaCobroId": null,
+    "origen": { "label": "Recursos Propios", "variant": "neutral" },
+    "tipo": "Total",
+    "montoRecibido": 22100000,
+    "montoRecibidoLabel": "$22,100,000",
+    "fecha": "2026-03-28",
+    "soporte": null,
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idTransaccion": "PAG-2026-043",
+    "entidadId": "instituto-distrital-de-prueba",
+    "entidad": "Instituto Distrital de Prueba",
+    "cuentaCobroId": "CC-2026-002",
+    "origen": { "label": "FONPET", "variant": "neutral" },
+    "tipo": "Total",
+    "montoRecibido": 31800000,
+    "montoRecibidoLabel": "$31,800,000",
+    "fecha": "2026-09-05",
+    "soporte": { "nombreArchivo": "consignacion-PAG-2026-043.xlsx", "fechaCargue": "2026-09-05" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idTransaccion": "PAG-2026-044",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidad": "Gobernación de Ejemplo",
+    "cuentaCobroId": "CC-2026-003",
+    "origen": { "label": "Recursos Propios", "variant": "neutral" },
+    "tipo": "Parcial",
+    "montoRecibido": 84200000,
+    "montoRecibidoLabel": "$84,200,000",
+    "fecha": "2026-09-10",
+    "soporte": { "nombreArchivo": "transferencia-PAG-2026-044.xlsx", "fechaCargue": "2026-09-10" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idTransaccion": "PAG-2026-045",
+    "entidadId": "alcaldia-municipal-de-muestra",
+    "entidad": "Alcaldía Municipal de Muestra",
+    "cuentaCobroId": "CC-2026-001",
+    "origen": { "label": "FONPET", "variant": "neutral" },
+    "tipo": "Total",
+    "montoRecibido": 52400000,
+    "montoRecibidoLabel": "$52,400,000",
+    "fecha": "2026-09-12",
+    "soporte": null,
+    "creadoPor": "admin@sgdp.gov.co"
+  }
+]
