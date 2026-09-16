@@ -1,11 +1,5 @@
 <div class="space-y-6">
-  <nav class="flex items-center gap-1.5 text-sm text-slate-400" aria-label="Breadcrumb">
-    <span>SGDP</span>
-    <span>/</span>
-    <span>Módulo 2</span>
-    <span>/</span>
-    <span class="font-medium text-slate-600">Parametrización</span>
-  </nav>
+  <app-breadcrumb [items]="['SGDP', 'Módulo 2', 'Parametrización']" />
 
   <div class="flex flex-wrap items-center gap-3">
     <h1 class="text-lg font-semibold text-slate-900">Módulo 2 — Parametrización</h1>
@@ -42,21 +36,5 @@
     </div>
   }
 
-  <div
-    class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs text-slate-500"
-  >
-    <span class="flex items-center gap-1.5">
-      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-      Sistema: Operacional
-    </span>
-    <span class="flex items-center gap-1.5">
-      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-      DB: Conectada — PG/14
-    </span>
-    <span class="flex items-center gap-1.5">
-      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-      Sesión: A. García — Activa
-    </span>
-    <span class="ml-auto text-slate-400">Último sync: 2026-06-19 09:42:07</span>
-  </div>
+  <app-system-status-bar />
 </div>

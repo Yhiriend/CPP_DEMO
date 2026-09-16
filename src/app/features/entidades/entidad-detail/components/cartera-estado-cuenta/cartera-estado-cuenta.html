@@ -1,0 +1,33 @@
+<div class="space-y-4">
+  <app-table title="Cartera / Estado de Cuenta" [columns]="columns" [rows]="obligaciones()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+      >
+        <svg lucideSlidersHorizontal class="h-4 w-4"></svg>
+        Filtros
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar Cartera (PDF)
+      </button>
+    </div>
+  </app-table>
+
+  @if (obligaciones().length > 0) {
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm"
+    >
+      <span class="font-semibold text-slate-900">Total Acumulado</span>
+      <div class="flex flex-wrap items-center gap-8">
+        <span class="font-semibold text-slate-900">{{ totalCapitalLabel() }}</span>
+        <span class="font-semibold text-slate-900">{{ totalInteresesLabel() }}</span>
+        <span class="text-slate-500">{{ estadoResumen() }}</span>
+      </div>
+    </div>
+  }
+</div>

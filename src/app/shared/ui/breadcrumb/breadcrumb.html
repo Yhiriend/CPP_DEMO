@@ -1,0 +1,8 @@
+<nav class="flex items-center gap-1.5 text-sm text-slate-400" aria-label="Breadcrumb">
+  @for (item of items(); track $index; let last = $last) {
+    <span [class.font-medium]="last" [class.text-slate-600]="last">{{ item }}</span>
+    @if (!last) {
+      <span>/</span>
+    }
+  }
+</nav>

@@ -1,11 +1,13 @@
 import { Component, computed, signal } from '@angular/core';
 
+import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
+import { SystemStatusBar } from '../../shared/ui/system-status-bar/system-status-bar';
 import { DtfRateSettings } from './components/dtf-rate-settings/dtf-rate-settings';
 import { PARAMETRIZACION_TABS } from './parametrizacion-tabs';
 
 @Component({
   selector: 'app-parametrizacion',
-  imports: [DtfRateSettings],
+  imports: [DtfRateSettings, Breadcrumb, SystemStatusBar],
   templateUrl: './parametrizacion.html',
 })
 export class Parametrizacion {

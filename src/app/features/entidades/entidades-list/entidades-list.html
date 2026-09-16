@@ -1,0 +1,54 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Entidades']" />
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="relative min-w-[220px] max-w-sm flex-1">
+      <svg lucideSearch class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></svg>
+      <input
+        type="search"
+        name="entidadSearch"
+        placeholder="Nombre o NIT"
+        class="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+      />
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-medium text-slate-400">
+        {{ filteredEntidades().length }}
+        {{ filteredEntidades().length === 1 ? 'entidad encontrada' : 'entidades encontradas' }}
+      </span>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="search()"
+      >
+        Buscar
+      </button>
+    </div>
+  </div>
+
+  <app-table title="Directorio de Entidades Concurrentes" [columns]="columns" [rows]="filteredEntidades()">
+    <div table-actions>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Crear Nueva Entidad
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verDetalle(row)"
+      >
+        Ver Detalle
+      </button>
+    </ng-template>
+  </app-table>
+
+  <app-system-status-bar />
+</div>

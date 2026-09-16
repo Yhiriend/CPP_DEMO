@@ -1,0 +1,99 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Entidades', entidad?.nombre ?? 'Detalle']" />
+
+  <a
+    routerLink="/entidades"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700"
+  >
+    <svg lucideArrowLeft class="h-4 w-4"></svg>
+    Volver al directorio
+  </a>
+
+  @if (entidad; as entidad) {
+    <div
+      class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+          <svg lucideBuilding2 class="h-6 w-6"></svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold text-slate-900">{{ entidad.nombre }}</h1>
+          <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+            <span>NIT: {{ entidad.codigoNit }}</span>
+            <span
+              class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
+            >
+              {{ entidad.estado.label }}
+            </span>
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {{ entidad.tipo }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-8">
+        <div>
+          <p class="text-xs text-slate-400">Deuda Total Actual</p>
+          <p class="text-lg font-semibold text-slate-900">{{ entidad.deudaTotalActual }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400">Último Pago</p>
+          <p class="text-lg font-semibold text-slate-900">{{ entidad.ultimoPago }}</p>
+        </div>
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        >
+          <svg lucideFileText class="h-4 w-4"></svg>
+          Generar Estado de Cuenta
+        </button>
+      </div>
+    </div>
+
+    <div class="border-b border-slate-200">
+      <div class="flex gap-1 overflow-x-auto">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            (click)="selectTab(tab.id)"
+            class="whitespace-nowrap rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-medium transition-colors"
+            [class]="
+              tab.id === activeTabId()
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-400 hover:text-slate-600'
+            "
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (activeTabId() === 'cartera-estado-cuenta') {
+      <app-cartera-estado-cuenta [entidadId]="entidad.id" />
+    } @else {
+      <div class="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+        <p class="text-sm font-medium text-slate-500">{{ activeTabLabel() }}</p>
+        <p class="mt-1 text-xs text-slate-400">Este sub-módulo aún no está disponible.</p>
+      </div>
+    }
+
+    <div
+      class="flex flex-wrap items-center gap-x-8 gap-y-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs text-slate-500"
+    >
+      <span><span class="text-slate-400">Creado por</span> · {{ entidad.creadoPor }}</span>
+      <span><span class="text-slate-400">Fecha creación</span> · {{ entidad.fechaCreacion }}</span>
+      <span><span class="text-slate-400">Última mod.</span> · {{ entidad.ultimaModificacion }}</span>
+      <span><span class="text-slate-400">Modificado por</span> · {{ entidad.modificadoPor }}</span>
+    </div>
+  } @else {
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+      <p class="text-sm font-medium text-slate-500">Entidad no encontrada</p>
+      <a routerLink="/entidades" class="mt-2 inline-block text-sm font-medium text-slate-600 underline">
+        Volver al directorio
+      </a>
+    </div>
+  }
+</div>

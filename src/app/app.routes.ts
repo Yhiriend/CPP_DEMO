@@ -26,6 +26,10 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/parametrizacion/parametrizacion.routes').then((m) => m.PARAMETRIZACION_ROUTES),
       },
+      {
+        path: 'entidades',
+        loadChildren: () => import('./features/entidades/entidades.routes').then((m) => m.ENTIDADES_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
