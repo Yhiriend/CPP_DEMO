@@ -61,6 +61,10 @@ export const routes: Routes = [
         path: 'intereses',
         loadChildren: () => import('./features/intereses/intereses.routes').then((m) => m.INTERESES_ROUTES),
       },
+      {
+        path: 'reportes',
+        loadChildren: () => import('./features/reportes/reportes.routes').then((m) => m.REPORTES_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

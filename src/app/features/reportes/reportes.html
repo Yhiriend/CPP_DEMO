@@ -1,0 +1,230 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Reportes']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Reportes y Auditoría</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Reportes consolidados (mensual, anual, financiero, contable y jurídico) sobre los datos vivos del sistema, y
+      trazabilidad de las operaciones registradas por los usuarios.
+    </p>
+  </div>
+
+  <div class="border-b border-slate-200">
+    <div class="flex gap-1 overflow-x-auto">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          (click)="selectTab(tab.id)"
+          class="whitespace-nowrap rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-medium transition-colors"
+          [class]="
+            tab.id === activeTabId()
+              ? 'border-slate-900 text-slate-900'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          "
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @switch (activeTabId()) {
+    @case ('generar') {
+      <div class="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+        <div>
+          <label for="repTipo" class="mb-1.5 block text-xs font-medium text-slate-500">Tipo de Reporte</label>
+          <select
+            id="repTipo"
+            name="repTipo"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTipo"
+          >
+            @for (tipo of tiposReporte; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="repEntidad" class="mb-1.5 block text-xs font-medium text-slate-500">Entidad</label>
+          <select
+            id="repEntidad"
+            name="repEntidad"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEntidadId"
+          >
+            <option value="">Todas las entidades</option>
+            @for (entidad of entidades(); track entidad.id) {
+              <option [value]="entidad.id">{{ entidad.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="repDesde" class="mb-1.5 block text-xs font-medium text-slate-500">Desde</label>
+          <input
+            id="repDesde"
+            name="repDesde"
+            type="date"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formFechaDesde"
+          />
+        </div>
+        <div>
+          <label for="repHasta" class="mb-1.5 block text-xs font-medium text-slate-500">Hasta</label>
+          <input
+            id="repHasta"
+            name="repHasta"
+            type="date"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formFechaHasta"
+          />
+        </div>
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="generarReporte()"
+        >
+          <svg lucideFileText class="h-4 w-4"></svg>
+          Generar Reporte
+        </button>
+      </div>
+
+      @if (reporteActual(); as reporte) {
+        <div class="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">
+                Reporte {{ reporte.tipo }} — {{ reporte.id }}
+              </h2>
+              <p class="text-xs text-slate-400">
+                {{ reporte.entidad }} · {{ reporte.filtros.fechaDesde }} → {{ reporte.filtros.fechaHasta }} · Generado
+                {{ reporte.timestamp }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              (click)="exportarReporte()"
+            >
+              <svg lucideDownload class="h-4 w-4"></svg>
+              Exportar CSV
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            @for (indicador of reporte.indicadores; track indicador.etiqueta) {
+              <div class="rounded-lg bg-slate-50 px-4 py-3">
+                <p class="text-xs text-slate-500">{{ indicador.etiqueta }}</p>
+                <p class="mt-1 text-base font-semibold text-slate-900">{{ indicador.valor }}</p>
+              </div>
+            }
+          </div>
+
+          @for (tabla of reporte.tablas; track tabla.titulo) {
+            <div>
+              <h3 class="mb-2 text-sm font-semibold text-slate-900">{{ tabla.titulo }}</h3>
+              <div class="overflow-x-auto rounded-lg border border-slate-200">
+                <table class="w-full text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50/60">
+                      @for (columna of tabla.columnas; track columna) {
+                        <th class="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          {{ columna }}
+                        </th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    @for (fila of tabla.filas; track $index) {
+                      <tr>
+                        @for (columna of tabla.columnas; track columna) {
+                          <td class="whitespace-nowrap px-4 py-2 text-slate-700">{{ fila[columna] }}</td>
+                        }
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td [attr.colspan]="tabla.columnas.length" class="px-4 py-6 text-center text-sm text-slate-400">
+                          Sin registros para los filtros seleccionados.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (historico().length > 0) {
+        <app-table title="Histórico de Reportes Generados" [columns]="columnsHistorico" [rows]="historico()">
+          <ng-template #rowActions let-row>
+            <button
+              type="button"
+              class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              (click)="verReporte(row)"
+            >
+              Ver
+            </button>
+          </ng-template>
+        </app-table>
+      }
+    }
+
+    @case ('auditoria') {
+      <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+        <span class="text-sm font-medium text-slate-600">Filtros:</span>
+        <input
+          type="search"
+          name="audSearch"
+          placeholder="Usuario, acción o detalle"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="filtroTexto"
+          (keyup.enter)="buscarAuditoria()"
+        />
+        <select
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="filtroModulo"
+        >
+          <option value="">Todos los módulos</option>
+          @for (modulo of modulosAuditoria; track modulo) {
+            <option [value]="modulo">{{ modulo }}</option>
+          }
+        </select>
+        <input
+          type="date"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="filtroDesde"
+        />
+        <input
+          type="date"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="filtroHasta"
+        />
+        <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="buscarAuditoria()"
+        >
+          Buscar
+        </button>
+        <span class="ml-auto text-xs font-medium text-slate-400">{{ eventosFiltrados().length }} eventos</span>
+      </div>
+
+      <app-table title="Trazabilidad de Operaciones" [columns]="columnsAuditoria" [rows]="eventosFiltrados()">
+        <div table-actions>
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+            (click)="exportarAuditoria()"
+          >
+            <svg lucideDownload class="h-4 w-4"></svg>
+            Exportar CSV
+          </button>
+        </div>
+      </app-table>
+      <p class="text-xs text-slate-400">
+        Los eventos de auditoría son de solo lectura: no pueden ser editados ni eliminados por usuarios funcionales.
+      </p>
+    }
+  }
+</div>

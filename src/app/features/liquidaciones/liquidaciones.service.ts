@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { calcularPorcentajeConcurrencia, calcularValorCuotaParte } from '../../shared/utils/liquidacion';
 import LIQUIDACIONES_SEED from '../../fake_data/liquidaciones.json';
@@ -19,6 +20,7 @@ const ESTADO_VARIANT: Record<EstadoLiquidacion, TableBadgeVariant> = {
 export class LiquidacionesService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly pensionadosService = inject(PensionadosService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _liquidaciones = signal<Liquidacion[]>(LIQUIDACIONES_SEED as Liquidacion[]);
   readonly liquidaciones = this._liquidaciones.asReadonly();
@@ -55,6 +57,12 @@ export class LiquidacionesService {
     };
 
     this._liquidaciones.update((list) => [nueva, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Liquidaciones',
+      accion: 'Generar',
+      entidadAfectada: `Liquidación ${nueva.idLiquidacion} (${nueva.pensionado})`,
+      detalle: `Generación de liquidación por ${nueva.capitalLabel} para ${nueva.entidad}, período ${nueva.periodo}.`,
+    });
     return nueva;
   }
 

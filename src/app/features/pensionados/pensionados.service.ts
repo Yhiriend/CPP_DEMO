@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { EntidadesService } from '../entidades/entidades.service';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { uniqueSlug } from '../../shared/utils/slug';
@@ -19,6 +20,7 @@ const TIPO_DOCUMENTO_VARIANT: TableBadgeVariant = 'neutral';
 @Injectable({ providedIn: 'root' })
 export class PensionadosService {
   private readonly entidadesService = inject(EntidadesService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _pensionados = signal<Pensionado[]>(PENSIONADOS_SEED as Pensionado[]);
   readonly pensionados = this._pensionados.asReadonly();
@@ -53,6 +55,12 @@ export class PensionadosService {
     };
 
     this._pensionados.update((list) => [nuevo, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Pensionados',
+      accion: 'Crear',
+      entidadAfectada: `Pensionado ${nuevo.nombresApellidos} (${nuevo.id})`,
+      detalle: `Registro de pensionado documento ${nuevo.numeroDocumento}.`,
+    });
   }
 
   updatePensionado(id: string, value: PensionadoFormValue): void {

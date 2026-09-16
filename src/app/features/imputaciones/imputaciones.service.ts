@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadge } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import IMPUTACIONES_SEED from '../../fake_data/imputaciones.json';
@@ -47,6 +48,7 @@ export class ImputacionesService {
   private readonly pagosService = inject(PagosService);
   private readonly cuentasDeCobroService = inject(CuentasDeCobroService);
   private readonly acuerdosService = inject(AcuerdosService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _imputaciones = signal<Imputacion[]>(IMPUTACIONES_SEED as Imputacion[]);
   readonly imputaciones = this._imputaciones.asReadonly();
@@ -229,6 +231,12 @@ export class ImputacionesService {
     };
 
     this._imputaciones.update((list) => [nueva, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Imputaciones',
+      accion: 'Imputar',
+      entidadAfectada: `Imputación ${nueva.idImputacion} (${nueva.cuentaCobroId})`,
+      detalle: `Imputación de ${nueva.valorImputadoLabel} del pago ${pago.idTransaccion} a la cuenta ${nueva.cuentaCobroId}.`,
+    });
     return nueva;
   }
 
@@ -283,6 +291,12 @@ export class ImputacionesService {
     };
 
     this._imputaciones.update((list) => [nueva, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Imputaciones',
+      accion: 'Imputar',
+      entidadAfectada: `Imputación ${nueva.idImputacion} (${nueva.cuentaCobroId})`,
+      detalle: `Imputación de ${nueva.valorImputadoLabel} del desembolso FONPET ${desembolso.idDesembolso} a la cuenta ${nueva.cuentaCobroId}.`,
+    });
     return nueva;
   }
 

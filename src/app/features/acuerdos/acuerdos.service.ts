@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import ACUERDOS_SEED from '../../fake_data/acuerdos.json';
@@ -27,6 +28,7 @@ const SESSION_USER = 'admin@sgdp.gov.co';
 @Injectable({ providedIn: 'root' })
 export class AcuerdosService {
   private readonly entidadesService = inject(EntidadesService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _acuerdos = signal<AcuerdoFonpet[]>(ACUERDOS_SEED as AcuerdoFonpet[]);
   readonly acuerdos = this._acuerdos.asReadonly();
@@ -78,6 +80,12 @@ export class AcuerdosService {
     };
 
     this._acuerdos.update((list) => [nuevo, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Acuerdos FONPET',
+      accion: 'Registrar',
+      entidadAfectada: `Acuerdo ${nuevo.idAcuerdo} (${nuevo.entidad})`,
+      detalle: `Registro de acuerdo de pago FONPET por ${nuevo.valorAprobadoLabel}.`,
+    });
     return nuevo;
   }
 
@@ -108,6 +116,12 @@ export class AcuerdosService {
     };
 
     this._desembolsos.update((list) => [nuevo, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Acuerdos FONPET',
+      accion: 'Registrar Desembolso',
+      entidadAfectada: `Desembolso ${nuevo.idDesembolso} (Acuerdo ${acuerdo.idAcuerdo})`,
+      detalle: `Registro de desembolso ${nuevo.tipo.toLowerCase()} por ${nuevo.valorLabel}.`,
+    });
     if (acuerdo.estado.label === 'Aprobado') {
       this.cambiarEstado(acuerdo.idAcuerdo, 'En Ejecución');
     }
@@ -128,6 +142,12 @@ export class AcuerdosService {
           : a,
       ),
     );
+    this.auditoriaService.registrar({
+      modulo: 'Acuerdos FONPET',
+      accion: 'Cambiar Estado',
+      entidadAfectada: `Acuerdo ${idAcuerdo}`,
+      detalle: `Cambio de estado a "${estado}".`,
+    });
   }
 
   private nextIdAcuerdo(): string {

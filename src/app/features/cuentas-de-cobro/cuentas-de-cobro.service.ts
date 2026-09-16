@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadge, TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { nowTimestamp, todayIso } from '../../shared/utils/date';
 import { numeroALetras } from '../../shared/utils/numero-a-letras';
@@ -45,6 +46,7 @@ export class CuentasDeCobroService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly liquidacionesService = inject(LiquidacionesService);
   private readonly interesesCalculoService = inject(InteresesCalculoService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _cuentasCobro = signal<CuentaCobro[]>(CUENTAS_COBRO_SEED as CuentaCobro[]);
   readonly cuentasCobro = this._cuentasCobro.asReadonly();
@@ -145,10 +147,22 @@ export class CuentasDeCobroService {
           : c,
       ),
     );
+    this.auditoriaService.registrar({
+      modulo: 'Cuentas de Cobro',
+      accion: 'Registrar Recepción',
+      entidadAfectada: `Cuenta de Cobro ${idCuenta}`,
+      detalle: `Registro de fecha de recepción ${value.fechaRecepcion}.`,
+    });
   }
 
   anular(idCuenta: string): void {
     this.setEstado(idCuenta, 'Anulada');
+    this.auditoriaService.registrar({
+      modulo: 'Cuentas de Cobro',
+      accion: 'Anular',
+      entidadAfectada: `Cuenta de Cobro ${idCuenta}`,
+      detalle: 'Anulación de la cuenta de cobro.',
+    });
   }
 
   /** Una cuenta Radicada cuya fecha de vencimiento ya pasó se muestra como Vencida (derivado en vivo, CCAL-005). */
@@ -193,6 +207,12 @@ export class CuentasDeCobroService {
     };
 
     this._cuentasCobro.update((list) => [nueva, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Cuentas de Cobro',
+      accion: 'Generar',
+      entidadAfectada: `Cuenta de Cobro ${nueva.idCuenta} (${nueva.entidad})`,
+      detalle: `Generación de cuenta de cobro ${nueva.tipo.toLowerCase()} por ${nueva.capitalLabel}.`,
+    });
     return nueva;
   }
 

@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import PAGOS_SEED from '../../fake_data/pagos.json';
 import { EntidadesService } from '../entidades/entidades.service';
 import { PagoFormValue, PagoRecibido } from './models/pago.model';
@@ -10,6 +11,7 @@ const SESSION_USER = 'admin@sgdp.gov.co';
 @Injectable({ providedIn: 'root' })
 export class PagosService {
   private readonly entidadesService = inject(EntidadesService);
+  private readonly auditoriaService = inject(AuditoriaService);
 
   private readonly _pagos = signal<PagoRecibido[]>(PAGOS_SEED as PagoRecibido[]);
   readonly pagos = this._pagos.asReadonly();
@@ -39,6 +41,12 @@ export class PagosService {
     };
 
     this._pagos.update((list) => [nuevo, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Pagos',
+      accion: 'Registrar',
+      entidadAfectada: `Pago ${nuevo.idTransaccion} (${nuevo.entidad})`,
+      detalle: `Registro de pago por ${nuevo.montoRecibidoLabel}, fuente ${nuevo.origen.label}.`,
+    });
     return nuevo;
   }
 

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "AUD-2026-001",
+    "fecha": "2026-01-05",
+    "timestamp": "2026-01-05 08:15",
+    "usuario": "a.garcia@sgdp.gov.co",
+    "modulo": "Parametrización",
+    "accion": "Registrar",
+    "entidadAfectada": "Tasa DTF DTF-2024-001",
+    "detalle": "Registro de tasa DTF 11.82% vigente desde 2024-01-01."
+  },
+  {
+    "id": "AUD-2026-002",
+    "fecha": "2026-08-01",
+    "timestamp": "2026-08-01 09:30",
+    "usuario": "admin@sgdp.gov.co",
+    "modulo": "Acuerdos FONPET",
+    "accion": "Registrar",
+    "entidadAfectada": "Acuerdo ACU-2026-001",
+    "detalle": "Registro de acuerdo de pago FONPET por $56,300,000 con Alcaldía Municipal de Muestra."
+  },
+  {
+    "id": "AUD-2026-003",
+    "fecha": "2026-08-05",
+    "timestamp": "2026-08-05 10:15",
+    "usuario": "admin@sgdp.gov.co",
+    "modulo": "Cuentas de Cobro",
+    "accion": "Registrar Recepción",
+    "entidadAfectada": "Cuenta de Cobro CC-2026-003",
+    "detalle": "Registro de fecha de recepción 2026-08-25 para Gobernación de Ejemplo."
+  },
+  {
+    "id": "AUD-2026-004",
+    "fecha": "2026-09-05",
+    "timestamp": "2026-09-05 08:40",
+    "usuario": "admin@sgdp.gov.co",
+    "modulo": "Pagos",
+    "accion": "Registrar",
+    "entidadAfectada": "Pago PAG-2026-043",
+    "detalle": "Registro de pago FONPET por $31,800,000 de Instituto Distrital de Prueba."
+  },
+  {
+    "id": "AUD-2026-005",
+    "fecha": "2026-09-05",
+    "timestamp": "2026-09-05 08:45",
+    "usuario": "admin@sgdp.gov.co",
+    "modulo": "Imputaciones",
+    "accion": "Imputar",
+    "entidadAfectada": "Imputación IMP-2026-001",
+    "detalle": "Imputación de $31,800,000 del pago PAG-2026-043 a la cuenta CC-2026-002."
+  },
+  {
+    "id": "AUD-2026-006",
+    "fecha": "2026-09-10",
+    "timestamp": "2026-09-10 09:05",
+    "usuario": "admin@sgdp.gov.co",
+    "modulo": "Imputaciones",
+    "accion": "Imputar",
+    "entidadAfectada": "Imputación IMP-2026-002",
+    "detalle": "Imputación de $84,200,000 del pago PAG-2026-044 a la cuenta CC-2026-003."
+  }
+]

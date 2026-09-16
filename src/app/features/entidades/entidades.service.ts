@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { nowTimestamp, todayIso } from '../../shared/utils/date';
 import { uniqueSlug } from '../../shared/utils/slug';
@@ -18,6 +19,8 @@ const SESSION_USER = 'admin@sgdp.gov.co';
 /** Backed by mock data for now; swap for an HTTP-backed store once the API is ready. */
 @Injectable({ providedIn: 'root' })
 export class EntidadesService {
+  private readonly auditoriaService = inject(AuditoriaService);
+
   private readonly _entidades = signal<Entidad[]>(ENTIDADES_SEED as Entidad[]);
   readonly entidades = this._entidades.asReadonly();
 
@@ -57,6 +60,12 @@ export class EntidadesService {
     };
 
     this._entidades.update((list) => [nueva, ...list]);
+    this.auditoriaService.registrar({
+      modulo: 'Entidades',
+      accion: 'Crear',
+      entidadAfectada: `Entidad ${nueva.nombre} (${nueva.id})`,
+      detalle: `Creación de entidad concurrente NIT ${nueva.codigoNit}.`,
+    });
   }
 
   updateEntidad(id: string, value: EntidadFormValue): void {
@@ -75,6 +84,12 @@ export class EntidadesService {
           : entidad,
       ),
     );
+    this.auditoriaService.registrar({
+      modulo: 'Entidades',
+      accion: 'Editar',
+      entidadAfectada: `Entidad ${value.nombre} (${id})`,
+      detalle: `Actualización de datos de la entidad.`,
+    });
   }
 
   activar(id: string): void {
