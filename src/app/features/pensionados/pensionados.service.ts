@@ -27,6 +27,10 @@ export class PensionadosService {
     return this._pensionados().find((pensionado) => pensionado.id === id);
   }
 
+  getPensionadoByDocumento(numeroDocumento: string): Pensionado | undefined {
+    return this._pensionados().find((pensionado) => pensionado.numeroDocumento === numeroDocumento);
+  }
+
   existsDocumento(numeroDocumento: string, excludeId?: string): boolean {
     return this._pensionados().some(
       (pensionado) => pensionado.numeroDocumento === numeroDocumento && pensionado.id !== excludeId,
