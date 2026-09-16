@@ -1,7 +1,8 @@
 <div class="flex min-h-screen flex-col md:flex-row">
   <section class="flex flex-col justify-between bg-slate-900 px-10 py-10 text-white md:w-2/5 md:px-14 md:py-14">
-    <div class="flex h-10 w-20 items-center justify-center rounded-md border border-white/20 text-xs font-semibold tracking-wider text-white/70">
-      LOGO
+    <div
+      class="flex h-10 w-20 items-center justify-center rounded-md border border-white/20 text-xs font-semibold tracking-wider text-white/70">
+      SCP
     </div>
 
     <div>
@@ -59,64 +60,46 @@
             <label for="username" class="mb-1.5 block text-sm font-medium text-slate-700">
               Usuario / Correo Institucional
             </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autocomplete="username"
-              placeholder="nombre@entidad.gov.co"
+            <input id="username" name="username" type="text" autocomplete="username" placeholder="nombre@entidad.gov.co"
               class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
-              [(ngModel)]="username"
-            />
+              [(ngModel)]="username" />
           </div>
 
           <div>
             <div class="mb-1.5 flex items-center justify-between">
               <label for="password" class="block text-sm font-medium text-slate-700">Contraseña</label>
-              <button
-                type="button"
-                class="text-xs font-medium text-slate-500 hover:text-slate-700"
-                (click)="forgotPassword()"
-              >
+              <button type="button" class="text-xs font-medium text-slate-500 hover:text-slate-700"
+                (click)="forgotPassword()">
                 Olvidé mi contraseña
               </button>
             </div>
             <div class="relative">
-              <input
-                id="password"
-                name="password"
-                [type]="showPassword ? 'text' : 'password'"
-                autocomplete="current-password"
-                placeholder="••••••••••"
+              <input id="password" name="password" [type]="showPassword ? 'text' : 'password'"
+                autocomplete="current-password" placeholder="••••••••••"
                 class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
-                [(ngModel)]="password"
-              />
-              <button
-                type="button"
+                [(ngModel)]="password" />
+              <button type="button"
                 class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600"
                 (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              >
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
                 @if (showPassword) {
-                  <svg lucideEyeOff class="h-4 w-4"></svg>
+                <svg lucideEyeOff class="h-4 w-4"></svg>
                 } @else {
-                  <svg lucideEye class="h-4 w-4"></svg>
+                <svg lucideEye class="h-4 w-4"></svg>
                 }
               </button>
             </div>
           </div>
 
           @if (errorMessage) {
-            <p class="text-sm font-medium text-red-600">{{ errorMessage }}</p>
+          <p class="text-sm font-medium text-red-600">{{ errorMessage }}</p>
           }
         </div>
 
         <div class="my-6 h-px w-full bg-slate-100"></div>
 
-        <button
-          type="submit"
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-        >
+        <button type="submit"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800">
           Ingresar al Sistema
           <svg lucideArrowRight class="h-4 w-4"></svg>
         </button>
