@@ -38,6 +38,11 @@ export const routes: Routes = [
         path: 'pagos',
         loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
       },
+      {
+        path: 'liquidaciones',
+        loadChildren: () =>
+          import('./features/liquidaciones/liquidaciones.routes').then((m) => m.LIQUIDACIONES_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
