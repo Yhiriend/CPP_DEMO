@@ -1,0 +1,111 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Pagos']" />
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <span
+        class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-slate-500"
+      >
+        Módulo 8
+      </span>
+      <h1 class="mt-2 text-lg font-semibold text-slate-900">Consultar Pagos</h1>
+    </div>
+    <span
+      class="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200"
+    >
+      Corte: 2026-06-19
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis; track kpi.label) {
+      <app-stat-card [stat]="kpi" />
+    }
+  </div>
+
+  <div class="border-b border-slate-200">
+    <div class="flex gap-1 overflow-x-auto">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          (click)="selectTab(tab.id)"
+          class="whitespace-nowrap rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-medium transition-colors"
+          [class]="
+            tab.id === activeTabId()
+              ? 'border-slate-900 text-slate-900'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          "
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+    >
+      <option>Todas las entidades</option>
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+    >
+      <option>Cualquier origen</option>
+    </select>
+    <input
+      type="date"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+    />
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">
+      {{ filteredPagos().length }} {{ filteredPagos().length === 1 ? 'registro' : 'registros' }}
+    </span>
+  </div>
+
+  <app-table title="Bandeja de Pagos Recibidos" [columns]="columns" [rows]="filteredPagos()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Registrar Pago
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+      >
+        Ver Detalle
+      </button>
+    </ng-template>
+  </app-table>
+
+  @if (filteredPagos().length > 0) {
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm"
+    >
+      <span class="font-semibold text-slate-900">Total Recibido</span>
+      <div class="flex flex-wrap items-center gap-8">
+        <span class="font-semibold text-slate-900">{{ totalRecibidoLabel() }}</span>
+        <span class="text-slate-500">{{ resumenEstados() }}</span>
+      </div>
+    </div>
+  }
+</div>

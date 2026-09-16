@@ -34,6 +34,10 @@ export const routes: Routes = [
         path: 'cartera',
         loadChildren: () => import('./features/cartera/cartera.routes').then((m) => m.CARTERA_ROUTES),
       },
+      {
+        path: 'pagos',
+        loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
