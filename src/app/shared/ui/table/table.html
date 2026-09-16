@@ -1,0 +1,104 @@
+<div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+  @if (title(); as titleText) {
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-4">
+      <div class="flex items-center gap-2">
+        <h2 class="text-sm font-semibold text-slate-900">{{ titleText }}</h2>
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+          {{ rows().length }} {{ rows().length === 1 ? 'fila' : 'filas' }}
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <ng-content select="[table-actions]" />
+      </div>
+    </div>
+  }
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-50/60">
+          @for (column of columns(); track column.key) {
+            <th
+              scope="col"
+              class="whitespace-nowrap px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
+              [class.text-right]="column.align === 'right'"
+              [class.text-center]="column.align === 'center'"
+            >
+              {{ column.header }}
+            </th>
+          }
+          @if (rowActionsTemplate()) {
+            <th scope="col" class="px-6 py-3"></th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (row of pagedRows(); track $index) {
+          <tr class="hover:bg-slate-50/60">
+            @for (column of columns(); track column.key) {
+              <td
+                class="whitespace-nowrap px-6 py-3.5 text-slate-700"
+                [class.text-right]="column.align === 'right'"
+                [class.text-center]="column.align === 'center'"
+              >
+                @let value = cellValue(row, column);
+                @if (isTableBadge(value)) {
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset"
+                    [class]="badgeClasses(value.variant)"
+                  >
+                    {{ value.label }}
+                  </span>
+                } @else {
+                  {{ value }}
+                }
+              </td>
+            }
+            @if (rowActionsTemplate(); as actionsTpl) {
+              <td class="whitespace-nowrap px-6 py-3.5 text-right">
+                <ng-container [ngTemplateOutlet]="actionsTpl" [ngTemplateOutletContext]="{ $implicit: row }" />
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td
+              [attr.colspan]="columns().length + (rowActionsTemplate() ? 1 : 0)"
+              class="px-6 py-10 text-center text-sm text-slate-400"
+            >
+              {{ emptyMessage() }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-6 py-3.5 text-sm text-slate-500">
+    <span>
+      Mostrando {{ rangeStart() }}-{{ rangeEnd() }} de {{ rows().length }}
+      {{ rows().length === 1 ? 'registro' : 'registros' }}
+    </span>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:bg-slate-50"
+        [disabled]="currentPage() <= 1"
+        (click)="goToPreviousPage()"
+      >
+        ‹ Anterior
+      </button>
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-medium text-white">
+        {{ currentPage() }}
+      </span>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:bg-slate-50"
+        [disabled]="currentPage() >= totalPages()"
+        (click)="goToNextPage()"
+      >
+        Siguiente ›
+      </button>
+    </div>
+  </div>
+</div>
