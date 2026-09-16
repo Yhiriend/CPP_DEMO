@@ -43,6 +43,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/liquidaciones/liquidaciones.routes').then((m) => m.LIQUIDACIONES_ROUTES),
       },
+      {
+        path: 'cuentas-de-cobro',
+        loadChildren: () =>
+          import('./features/cuentas-de-cobro/cuentas-de-cobro.routes').then((m) => m.CUENTAS_DE_COBRO_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
