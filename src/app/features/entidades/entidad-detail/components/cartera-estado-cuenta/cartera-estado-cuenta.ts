@@ -1,11 +1,18 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { LucideDownload, LucideSlidersHorizontal } from '@lucide/angular';
 
+import { InteresesCalculoService } from '../../../../intereses/intereses-calculo.service';
 import { Table } from '../../../../../shared/ui/table/table';
 import { TableColumn } from '../../../../../shared/ui/table/table.model';
 import { ToastService } from '../../../../../shared/ui/toast/toast.service';
 import { EntidadesService } from '../../../entidades.service';
 import { ObligacionCartera } from '../../../models/entidad.model';
+
+interface ObligacionConIntereses extends ObligacionCartera {
+  readonly diasMora: number;
+  readonly interesesGenerados: number;
+  readonly interesesGeneradosLabel: string;
+}
 
 @Component({
   selector: 'app-cartera-estado-cuenta',
@@ -14,19 +21,32 @@ import { ObligacionCartera } from '../../../models/entidad.model';
 })
 export class CarteraEstadoCuenta {
   private readonly entidadesService = inject(EntidadesService);
+  private readonly interesesCalculoService = inject(InteresesCalculoService);
   private readonly toastService = inject(ToastService);
 
   readonly entidadId = input.required<string>();
 
-  protected readonly columns: TableColumn<ObligacionCartera>[] = [
+  protected readonly columns: TableColumn<ObligacionConIntereses>[] = [
     { key: 'id', header: 'ID Obligación' },
     { key: 'periodo', header: 'Periodo' },
     { key: 'capitalAdeudadoLabel', header: 'Capital Adeudado', align: 'right' },
+    { key: 'diasMora', header: 'Días Mora', align: 'right' },
     { key: 'interesesGeneradosLabel', header: 'Intereses Generados', align: 'right' },
     { key: 'estadoPago', header: 'Estado de Pago' },
   ];
 
-  protected readonly obligaciones = computed(() => this.entidadesService.getObligaciones(this.entidadId()));
+  /** Recalculated on every read from the current DTF vigente — HU-009. */
+  protected readonly obligaciones = computed<readonly ObligacionConIntereses[]>(() =>
+    this.entidadesService.getObligaciones(this.entidadId()).map((obligacion) => {
+      const calculo = this.interesesCalculoService.calcular(obligacion.capitalAdeudado, obligacion.fechaBaseMora);
+      return {
+        ...obligacion,
+        diasMora: calculo.diasMora,
+        interesesGenerados: calculo.interes,
+        interesesGeneradosLabel: calculo.interesLabel,
+      };
+    }),
+  );
 
   private readonly totalCapital = computed(() =>
     this.obligaciones().reduce((sum, obligacion) => sum + obligacion.capitalAdeudado, 0),

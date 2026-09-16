@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideDownload, LucideInfo, LucidePlus, LucideSearch, LucideSquarePen } from '@lucide/angular';
 
+import { Modal } from '../../../../shared/ui/modal/modal';
 import { Table } from '../../../../shared/ui/table/table';
 import { TableColumn } from '../../../../shared/ui/table/table.model';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
@@ -10,7 +11,7 @@ import { ParametrizacionService } from '../../parametrizacion.service';
 
 @Component({
   selector: 'app-dtf-rate-settings',
-  imports: [Table, FormsModule, LucideDownload, LucideInfo, LucidePlus, LucideSearch, LucideSquarePen],
+  imports: [Table, FormsModule, Modal, LucideDownload, LucideInfo, LucidePlus, LucideSearch, LucideSquarePen],
   templateUrl: './dtf-rate-settings.html',
 })
 export class DtfRateSettings {
@@ -39,6 +40,8 @@ export class DtfRateSettings {
       [rate.codigo, rate.periodo, rate.usuarioResponsable].some((field) => field.toLowerCase().includes(term)),
     );
   });
+
+  // --- Registrar nueva tasa ---
 
   protected tasaValue: number | null = null;
   protected vigenciaInicial = '';
@@ -74,7 +77,44 @@ export class DtfRateSettings {
     this.toastService.show('La exportación a CSV/PDF estará disponible próximamente.');
   }
 
+  // --- Editar tasa existente ---
+
+  protected readonly showEditModal = signal(false);
+  protected readonly editingRate = signal<DtfRate | null>(null);
+  protected editTasaValue: number | null = null;
+  protected editVigenciaInicial = '';
+  protected editFormError = '';
+
   protected editarTasa(rate: DtfRate): void {
-    this.toastService.show(`Editar ${rate.codigo} estará disponible próximamente.`);
+    this.editingRate.set(rate);
+    this.editTasaValue = rate.tasaValor;
+    this.editVigenciaInicial = rate.vigenciaInicial;
+    this.editFormError = '';
+    this.showEditModal.set(true);
+  }
+
+  protected submitEdit(): void {
+    if (this.editTasaValue === null || Number.isNaN(this.editTasaValue) || this.editTasaValue <= 0) {
+      this.editFormError = 'Ingrese un valor de tasa válido.';
+      return;
+    }
+
+    if (!this.editVigenciaInicial) {
+      this.editFormError = 'Seleccione la vigencia inicial.';
+      return;
+    }
+
+    const rate = this.editingRate();
+    if (!rate) {
+      return;
+    }
+
+    this.parametrizacionService.updateDtfRate(rate.codigo, {
+      tasa: this.editTasaValue,
+      vigenciaInicial: this.editVigenciaInicial,
+    });
+
+    this.showEditModal.set(false);
+    this.toastService.show(`Tasa ${rate.codigo} actualizada correctamente.`);
   }
 }

@@ -32,7 +32,7 @@ export interface ObligacionCartera {
   readonly periodo: string;
   readonly capitalAdeudado: number;
   readonly capitalAdeudadoLabel: string;
-  readonly interesesGenerados: number;
-  readonly interesesGeneradosLabel: string;
+  /** Mora start date (CCAL-006 input) — interest is calculated live from this, not stored. */
+  readonly fechaBaseMora: string;
   readonly estadoPago: TableBadge;
 }

@@ -5,8 +5,7 @@
       "periodo": "Enero 2024",
       "capitalAdeudado": 84200000,
       "capitalAdeudadoLabel": "$84,200,000",
-      "interesesGenerados": 9620000,
-      "interesesGeneradosLabel": "$9,620,000",
+      "fechaBaseMora": "2024-03-02",
       "estadoPago": { "label": "Vencida", "variant": "warning" }
     },
     {
@@ -14,8 +13,7 @@
       "periodo": "Febrero 2024",
       "capitalAdeudado": 84200000,
       "capitalAdeudadoLabel": "$84,200,000",
-      "interesesGenerados": 9240000,
-      "interesesGeneradosLabel": "$9,240,000",
+      "fechaBaseMora": "2024-03-30",
       "estadoPago": { "label": "Vencida", "variant": "warning" }
     },
     {
@@ -23,8 +21,7 @@
       "periodo": "Marzo 2024",
       "capitalAdeudado": 84200000,
       "capitalAdeudadoLabel": "$84,200,000",
-      "interesesGenerados": 8810000,
-      "interesesGeneradosLabel": "$8,810,000",
+      "fechaBaseMora": "2024-04-30",
       "estadoPago": { "label": "Pendiente", "variant": "neutral" }
     },
     {
@@ -32,8 +29,7 @@
       "periodo": "Abril 2024",
       "capitalAdeudado": 84200000,
       "capitalAdeudadoLabel": "$84,200,000",
-      "interesesGenerados": 8400000,
-      "interesesGeneradosLabel": "$8,400,000",
+      "fechaBaseMora": "2024-05-30",
       "estadoPago": { "label": "Al Día", "variant": "success" }
     }
   ]
