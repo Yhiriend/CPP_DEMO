@@ -1,0 +1,14 @@
+[
+  {
+    "idDesembolso": "DES-2026-001",
+    "acuerdoId": "ACU-2026-002",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidad": "Gobernación de Ejemplo",
+    "tipo": "Parcial",
+    "valor": 15000000,
+    "valorLabel": "$15,000,000",
+    "fecha": "2026-08-05",
+    "soporte": { "nombreArchivo": "giro-DES-2026-001.xlsx", "fechaCargue": "2026-08-05" },
+    "registradoPor": "admin@sgdp.gov.co"
+  }
+]

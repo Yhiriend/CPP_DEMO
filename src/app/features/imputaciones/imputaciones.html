@@ -2,9 +2,9 @@
   <app-breadcrumb [items]="['SGDP', 'Imputaciones']" />
 
   <div>
-    <h1 class="text-lg font-semibold text-slate-900">Imputación de Pagos</h1>
+    <h1 class="text-lg font-semibold text-slate-900">Imputación de Pagos y Recursos FONPET</h1>
     <p class="mt-1 text-sm text-slate-500">
-      Aplicación de pagos recibidos a obligaciones específicas, primero a intereses y luego a capital.
+      Aplicación de pagos y desembolsos FONPET a obligaciones específicas, primero a intereses y luego a capital.
     </p>
   </div>
 
@@ -40,7 +40,21 @@
           <button
             type="button"
             class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-800"
-            (click)="abrirImputar(row)"
+            (click)="abrirImputarPago(row)"
+          >
+            Imputar
+          </button>
+        </ng-template>
+      </app-table>
+    }
+
+    @case ('desembolsos') {
+      <app-table title="Desembolsos FONPET Pendientes de Imputar" [columns]="columnsDesembolsos" [rows]="desembolsosPendientes()">
+        <ng-template #rowActions let-row>
+          <button
+            type="button"
+            class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-800"
+            (click)="abrirImputarDesembolso(row)"
           >
             Imputar
           </button>
@@ -114,17 +128,17 @@
   }
 </div>
 
-@if (showImputarModal() && imputarPago(); as pago) {
-  <app-modal [title]="'Imputar Pago ' + pago.idTransaccion" (close)="showImputarModal.set(false)">
+@if (showImputarModal() && imputarPartida(); as partida) {
+  <app-modal [title]="'Imputar ' + partidaId" (close)="showImputarModal.set(false)">
     <div modal-body class="space-y-4 text-sm">
       <div class="rounded-lg bg-slate-50 px-4 py-3">
         <div class="flex items-center justify-between">
           <span class="text-slate-500">Entidad</span>
-          <span class="font-medium text-slate-900">{{ pago.entidad }}</span>
+          <span class="font-medium text-slate-900">{{ partidaEntidad }}</span>
         </div>
         <div class="mt-1 flex items-center justify-between">
           <span class="text-slate-500">Disponible por Imputar</span>
-          <span class="font-medium text-slate-900">{{ pago.montoDisponibleLabel }}</span>
+          <span class="font-medium text-slate-900">{{ partidaMontoDisponibleLabel }}</span>
         </div>
       </div>
 
@@ -151,15 +165,21 @@
                 <option [value]="cuenta.idCuenta">{{ cuenta.idCuenta }} — {{ cuenta.capitalLabel }}</option>
               }
             </select>
-            <button
-              type="button"
-              class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-              (click)="usarObligacionMasAntigua()"
-            >
-              Más antigua
-            </button>
+            @if (!esDesembolso()) {
+              <button
+                type="button"
+                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                (click)="usarObligacionMasAntigua()"
+              >
+                Más antigua
+              </button>
+            }
           </div>
-          <p class="mt-1.5 text-xs text-slate-400">CCAL-019 — si no se indica, se aplica a la obligación más antigua.</p>
+          @if (esDesembolso()) {
+            <p class="mt-1.5 text-xs text-slate-400">Solo se listan las obligaciones cubiertas por el acuerdo FONPET.</p>
+          } @else {
+            <p class="mt-1.5 text-xs text-slate-400">CCAL-019 — si no se indica, se aplica a la obligación más antigua.</p>
+          }
         }
       </div>
 
@@ -170,7 +190,7 @@
           name="impValor"
           type="number"
           min="0"
-          [max]="pago.montoDisponible"
+          [max]="partidaMontoDisponible"
           class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
           [(ngModel)]="formValorAImputar"
         />
@@ -235,8 +255,12 @@
     <div modal-body class="space-y-4 text-sm">
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Pago</p>
-          <p class="font-medium text-slate-900">{{ imputacion.pagoId }}</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Origen</p>
+          <p class="font-medium text-slate-900">{{ imputacion.origen }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Referencia</p>
+          <p class="font-medium text-slate-900">{{ imputacion.pagoId ?? imputacion.desembolsoId }}</p>
         </div>
         <div>
           <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Cuenta de Cobro</p>

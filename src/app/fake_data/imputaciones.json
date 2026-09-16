@@ -1,7 +1,9 @@
 [
   {
     "idImputacion": "IMP-2026-001",
+    "origen": "Pago",
     "pagoId": "PAG-2026-043",
+    "desembolsoId": null,
     "cuentaCobroId": "CC-2026-002",
     "entidadId": "instituto-distrital-de-prueba",
     "entidad": "Instituto Distrital de Prueba",
@@ -26,7 +28,9 @@
   },
   {
     "idImputacion": "IMP-2026-002",
+    "origen": "Pago",
     "pagoId": "PAG-2026-044",
+    "desembolsoId": null,
     "cuentaCobroId": "CC-2026-003",
     "entidadId": "gobernacion-de-ejemplo",
     "entidad": "Gobernación de Ejemplo",

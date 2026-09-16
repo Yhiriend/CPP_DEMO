@@ -1,0 +1,31 @@
+[
+  {
+    "idAcuerdo": "ACU-2026-001",
+    "entidadId": "alcaldia-municipal-de-muestra",
+    "entidad": "Alcaldía Municipal de Muestra",
+    "cuentaCobroIds": ["CC-2026-001"],
+    "valorAprobado": 56300000,
+    "valorAprobadoLabel": "$56,300,000",
+    "fechaAprobacion": "2026-08-01",
+    "soporte": { "nombreArchivo": "resolucion-ACU-2026-001.xlsx", "fechaCargue": "2026-08-01" },
+    "estado": { "label": "Aprobado", "variant": "info" },
+    "historialEstados": [{ "estado": "Aprobado", "fecha": "2026-08-01", "registradoPor": "admin@sgdp.gov.co" }],
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idAcuerdo": "ACU-2026-002",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidad": "Gobernación de Ejemplo",
+    "cuentaCobroIds": ["CC-2026-003"],
+    "valorAprobado": 25000000,
+    "valorAprobadoLabel": "$25,000,000",
+    "fechaAprobacion": "2026-07-15",
+    "soporte": { "nombreArchivo": "resolucion-ACU-2026-002.xlsx", "fechaCargue": "2026-07-15" },
+    "estado": { "label": "En Ejecución", "variant": "warning" },
+    "historialEstados": [
+      { "estado": "En Ejecución", "fecha": "2026-08-05", "registradoPor": "admin@sgdp.gov.co" },
+      { "estado": "Aprobado", "fecha": "2026-07-15", "registradoPor": "admin@sgdp.gov.co" }
+    ],
+    "creadoPor": "admin@sgdp.gov.co"
+  }
+]

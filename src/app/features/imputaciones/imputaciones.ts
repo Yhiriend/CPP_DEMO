@@ -11,6 +11,7 @@ import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 import { todayIso } from '../../shared/utils/date';
+import { DesembolsoFonpet } from '../acuerdos/models/acuerdo.model';
 import { EntidadesService } from '../entidades/entidades.service';
 import { PagoRecibido } from '../pagos/models/pago.model';
 import { IMPUTACION_TABS, ImputacionTabId } from './imputaciones-tabs';
@@ -22,6 +23,15 @@ interface PagoPendienteRow extends PagoRecibido {
   readonly montoDisponibleLabel: string;
   readonly obligacionLabel: string;
 }
+
+interface DesembolsoPendienteRow extends DesembolsoFonpet {
+  readonly montoDisponible: number;
+  readonly montoDisponibleLabel: string;
+}
+
+type PartidaPendiente =
+  | { readonly kind: 'pago'; readonly data: PagoPendienteRow }
+  | { readonly kind: 'desembolso'; readonly data: DesembolsoPendienteRow };
 
 @Component({
   selector: 'app-imputaciones',
@@ -47,6 +57,11 @@ export class Imputaciones {
       (sum, p) => sum + this.imputacionesService.montoDisponibleDePago(p),
       0,
     );
+    const desembolsosPendientes = this.imputacionesService.desembolsosPendientesDeImputar();
+    const totalDesembolsosPendientes = desembolsosPendientes.reduce(
+      (sum, d) => sum + this.imputacionesService.montoDisponibleDeDesembolso(d),
+      0,
+    );
     const historico = this.imputacionesService.imputaciones();
     const totalImputado = historico.reduce((sum, i) => sum + i.valorImputado, 0);
     const totalIntereses = historico.reduce((sum, i) => sum + i.valorAplicadoIntereses, 0);
@@ -58,9 +73,13 @@ export class Imputaciones {
         value: this.formatCurrency(totalPendiente),
         subtitle: `${pendientes.length} pagos`,
       },
-      { label: 'Total Imputado', value: this.formatCurrency(totalImputado), subtitle: `${historico.length} imputaciones` },
+      {
+        label: 'Desembolsos FONPET Pendientes',
+        value: this.formatCurrency(totalDesembolsosPendientes),
+        subtitle: `${desembolsosPendientes.length} desembolsos`,
+      },
       { label: 'Aplicado a Intereses', value: this.formatCurrency(totalIntereses), subtitle: 'CCAL-014' },
-      { label: 'Aplicado a Capital', value: this.formatCurrency(totalCapital), subtitle: 'CCAL-015' },
+      { label: 'Aplicado a Capital', value: this.formatCurrency(totalCapital), subtitle: `CCAL-015 · ${historico.length} imputaciones` },
     ];
   });
 
@@ -84,40 +103,92 @@ export class Imputaciones {
     })),
   );
 
-  // --- Imputar modal (HU-016/017) ---
+  // --- Desembolsos FONPET Pendientes de Imputar (HU-022) ---
+
+  protected readonly columnsDesembolsos: TableColumn<DesembolsoPendienteRow>[] = [
+    { key: 'idDesembolso', header: 'ID Desembolso' },
+    { key: 'acuerdoId', header: 'Acuerdo' },
+    { key: 'entidad', header: 'Entidad' },
+    { key: 'valorLabel', header: 'Valor Desembolsado', align: 'right' },
+    { key: 'montoDisponibleLabel', header: 'Disponible', align: 'right' },
+    { key: 'fecha', header: 'Fecha' },
+  ];
+
+  protected readonly desembolsosPendientes = computed<readonly DesembolsoPendienteRow[]>(() =>
+    this.imputacionesService.desembolsosPendientesDeImputar().map((desembolso) => ({
+      ...desembolso,
+      montoDisponible: this.imputacionesService.montoDisponibleDeDesembolso(desembolso),
+      montoDisponibleLabel: this.formatCurrency(this.imputacionesService.montoDisponibleDeDesembolso(desembolso)),
+    })),
+  );
+
+  // --- Imputar modal (HU-016/017/022) ---
 
   protected readonly showImputarModal = signal(false);
-  protected readonly imputarPago = signal<PagoPendienteRow | null>(null);
+  protected readonly imputarPartida = signal<PartidaPendiente | null>(null);
   protected formCuentaCobroId = '';
   protected formValorAImputar: number | null = null;
   protected formError = '';
 
-  protected readonly cuentaBloqueada = computed(() => !!this.imputarPago()?.cuentaCobroId);
-
-  protected readonly cuentasDisponibles = computed(() => {
-    const pago = this.imputarPago();
-    if (!pago) return [];
-    return this.imputacionesService.cuentasPendientesDeEntidad(pago.entidadId);
+  protected readonly esDesembolso = computed(() => this.imputarPartida()?.kind === 'desembolso');
+  protected readonly cuentaBloqueada = computed(() => {
+    const partida = this.imputarPartida();
+    return partida?.kind === 'pago' && !!partida.data.cuentaCobroId;
   });
 
-  protected abrirImputar(pago: PagoPendienteRow): void {
-    this.imputarPago.set(pago);
+  protected readonly cuentasDisponibles = computed(() => {
+    const partida = this.imputarPartida();
+    if (!partida) return [];
+    if (partida.kind === 'pago') {
+      return this.imputacionesService.cuentasPendientesDeEntidad(partida.data.entidadId);
+    }
+    return this.imputacionesService.cuentasElegiblesDeDesembolso(partida.data);
+  });
+
+  protected abrirImputarPago(pago: PagoPendienteRow): void {
+    this.imputarPartida.set({ kind: 'pago', data: pago });
     this.formCuentaCobroId = pago.cuentaCobroId ?? '';
     this.formValorAImputar = pago.montoDisponible;
     this.formError = '';
     this.showImputarModal.set(true);
   }
 
+  protected abrirImputarDesembolso(desembolso: DesembolsoPendienteRow): void {
+    this.imputarPartida.set({ kind: 'desembolso', data: desembolso });
+    this.formCuentaCobroId = '';
+    this.formValorAImputar = desembolso.montoDisponible;
+    this.formError = '';
+    this.showImputarModal.set(true);
+  }
+
   protected usarObligacionMasAntigua(): void {
-    const pago = this.imputarPago();
-    if (!pago) return;
-    const masAntigua = this.imputacionesService.obligacionMasAntigua(pago.entidadId);
+    const partida = this.imputarPartida();
+    if (!partida || partida.kind !== 'pago') return;
+    const masAntigua = this.imputacionesService.obligacionMasAntigua(partida.data.entidadId);
     if (!masAntigua) {
       this.formError = 'No hay obligaciones pendientes para esta entidad.';
       return;
     }
     this.formCuentaCobroId = masAntigua.idCuenta;
     this.formError = '';
+  }
+
+  protected get partidaId(): string {
+    const partida = this.imputarPartida();
+    if (!partida) return '';
+    return partida.kind === 'pago' ? partida.data.idTransaccion : partida.data.idDesembolso;
+  }
+
+  protected get partidaEntidad(): string {
+    return this.imputarPartida()?.data.entidad ?? '';
+  }
+
+  protected get partidaMontoDisponibleLabel(): string {
+    return this.imputarPartida()?.data.montoDisponibleLabel ?? '';
+  }
+
+  protected get partidaMontoDisponible(): number {
+    return this.imputarPartida()?.data.montoDisponible ?? 0;
   }
 
   /** Getter (no `computed`) porque formCuentaCobroId/formValorAImputar son campos planos de ngModel, no signals. */
@@ -127,10 +198,10 @@ export class Imputaciones {
   }
 
   protected submitImputar(): void {
-    const pago = this.imputarPago();
-    if (!pago) return;
+    const partida = this.imputarPartida();
+    if (!partida) return;
     if (!this.formCuentaCobroId) {
-      this.formError = 'Seleccione la obligación a la que se aplicará el pago, o use la obligación más antigua.';
+      this.formError = 'Seleccione la obligación a la que se aplicará el recurso.';
       return;
     }
     if (!this.formValorAImputar || this.formValorAImputar <= 0) {
@@ -139,11 +210,18 @@ export class Imputaciones {
     }
 
     try {
-      const nueva = this.imputacionesService.imputar({
-        pagoId: pago.idTransaccion,
-        cuentaCobroId: this.formCuentaCobroId,
-        valorAImputar: this.formValorAImputar,
-      });
+      const nueva =
+        partida.kind === 'pago'
+          ? this.imputacionesService.imputar({
+              pagoId: partida.data.idTransaccion,
+              cuentaCobroId: this.formCuentaCobroId,
+              valorAImputar: this.formValorAImputar,
+            })
+          : this.imputacionesService.imputarDesembolso({
+              desembolsoId: partida.data.idDesembolso,
+              cuentaCobroId: this.formCuentaCobroId,
+              valorAImputar: this.formValorAImputar,
+            });
       this.toastService.show(`Imputación ${nueva.idImputacion} registrada correctamente.`);
       this.showImputarModal.set(false);
     } catch (error) {
@@ -155,14 +233,13 @@ export class Imputaciones {
 
   protected readonly columnsHistorico: TableColumn<Imputacion>[] = [
     { key: 'idImputacion', header: 'ID Imputación' },
-    { key: 'pagoId', header: 'Pago' },
+    { key: 'origen', header: 'Origen' },
     { key: 'cuentaCobroId', header: 'Cuenta de Cobro' },
     { key: 'entidad', header: 'Entidad' },
     { key: 'valorImputadoLabel', header: 'Valor Imputado', align: 'right' },
     { key: 'valorAplicadoInteresesLabel', header: 'A Intereses', align: 'right' },
     { key: 'valorAplicadoCapitalLabel', header: 'A Capital', align: 'right' },
     { key: 'saldoTotalObligacionLabel', header: 'Saldo Resultante', align: 'right' },
-    { key: 'reglaAplicada', header: 'Regla' },
     { key: 'fecha', header: 'Fecha' },
   ];
 
@@ -187,8 +264,9 @@ export class Imputaciones {
       if (desde && imputacion.fecha < desde) return false;
       if (hasta && imputacion.fecha > hasta) return false;
       if (term) {
+        const referencia = imputacion.pagoId ?? imputacion.desembolsoId ?? '';
         const haystack =
-          `${imputacion.idImputacion} ${imputacion.pagoId} ${imputacion.cuentaCobroId} ${imputacion.entidad} ${imputacion.pensionados.join(' ')}`.toLowerCase();
+          `${imputacion.idImputacion} ${referencia} ${imputacion.cuentaCobroId} ${imputacion.entidad} ${imputacion.pensionados.join(' ')}`.toLowerCase();
         if (!haystack.includes(term)) return false;
       }
       return true;
@@ -206,7 +284,8 @@ export class Imputaciones {
     const imputaciones = this.filteredHistorico();
     const encabezado = [
       'ID Imputación',
-      'Pago',
+      'Origen',
+      'Referencia',
       'Cuenta',
       'Entidad',
       'Pensionados',
@@ -220,7 +299,8 @@ export class Imputaciones {
     ];
     const filas = imputaciones.map((i) => [
       i.idImputacion,
-      i.pagoId,
+      i.origen,
+      i.pagoId ?? i.desembolsoId ?? '',
       i.cuentaCobroId,
       i.entidad,
       i.pensionados.join('; '),

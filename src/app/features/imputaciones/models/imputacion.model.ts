@@ -1,8 +1,11 @@
 export type ReglaImputacion = 'Manual' | 'Obligación más antigua';
+export type OrigenImputacion = 'Pago' | 'Desembolso FONPET';
 
 export interface Imputacion {
   readonly idImputacion: string;
-  readonly pagoId: string;
+  readonly origen: OrigenImputacion;
+  readonly pagoId: string | null;
+  readonly desembolsoId: string | null;
   readonly cuentaCobroId: string;
   readonly entidadId: string;
   readonly entidad: string;
@@ -38,5 +41,11 @@ export interface ImputarPagoValue {
   readonly pagoId: string;
   /** null → se aplica CCAL-019 (obligación más antigua de la entidad del pago). */
   readonly cuentaCobroId: string | null;
+  readonly valorAImputar: number;
+}
+
+export interface ImputarDesembolsoValue {
+  readonly desembolsoId: string;
+  readonly cuentaCobroId: string;
   readonly valorAImputar: number;
 }

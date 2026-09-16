@@ -1,30 +1,366 @@
-<app-table title="Bandeja de Trámites y Acuerdos" [columns]="columns" [rows]="acuerdos">
-  <div table-actions class="flex items-center gap-2">
-    <button
-      type="button"
-      class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
-      (click)="exportar()"
-    >
-      <svg lucideDownload class="h-4 w-4"></svg>
-      Exportar CSV
-    </button>
-    <button
-      type="button"
-      class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-      (click)="radicarSolicitud()"
-    >
-      <svg lucidePlus class="h-4 w-4"></svg>
-      Radicar Solicitud
-    </button>
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Acuerdos']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Acuerdos de Pago FONPET</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Registro y seguimiento de acuerdos aprobados por FONPET, sus desembolsos y su aplicación a las obligaciones.
+    </p>
   </div>
 
-  <ng-template #rowActions let-row>
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <input
+      type="search"
+      name="acuerdoSearch"
+      placeholder="ID o entidad"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="buscar()"
+    />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEstado"
+    >
+      <option value="">Cualquier estado</option>
+      @for (estado of estados; track estado) {
+        <option [value]="estado">{{ estado }}</option>
+      }
+    </select>
     <button
       type="button"
-      class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-      (click)="verSeguimiento(row)"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
     >
-      Ver Seguimiento
+      Buscar
     </button>
-  </ng-template>
-</app-table>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredAcuerdos().length }} registros</span>
+  </div>
+
+  <app-table title="Acuerdos de Pago FONPET" [columns]="columns" [rows]="filteredAcuerdos()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="exportar()"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="openFormModal()"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Registrar Acuerdo
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verSeguimiento(row)"
+      >
+        Ver Seguimiento
+      </button>
+    </ng-template>
+  </app-table>
+</div>
+
+@if (showFormModal()) {
+  <app-modal title="Registrar Acuerdo de Pago FONPET" (close)="showFormModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div>
+        <label for="acuerdoEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Entidad*</label>
+        <select
+          id="acuerdoEntidad"
+          name="acuerdoEntidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formEntidadId"
+        >
+          <option value="" disabled>Seleccione...</option>
+          @for (entidad of entidades(); track entidad.id) {
+            <option [value]="entidad.id">{{ entidad.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (formEntidadId) {
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Obligaciones Cubiertas</label>
+          @if (cuentasDeLaEntidad.length === 0) {
+            <p class="text-xs text-slate-400">Esta entidad no tiene cuentas de cobro registradas.</p>
+          }
+          <div class="max-h-32 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-3">
+            @for (cuenta of cuentasDeLaEntidad; track cuenta.idCuenta) {
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" (change)="toggleCuenta(cuenta.idCuenta, $any($event.target).checked)" />
+                {{ cuenta.idCuenta }} — {{ cuenta.capitalLabel }}
+              </label>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="acuerdoValor" class="mb-1.5 block text-sm font-medium text-slate-700">Valor Aprobado*</label>
+          <input
+            id="acuerdoValor"
+            name="acuerdoValor"
+            type="number"
+            min="0"
+            placeholder="0"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formValorAprobado"
+          />
+        </div>
+        <div>
+          <label for="acuerdoFecha" class="mb-1.5 block text-sm font-medium text-slate-700">Fecha Aprobación*</label>
+          <input
+            id="acuerdoFecha"
+            name="acuerdoFecha"
+            type="date"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formFechaAprobacion"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="acuerdoSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="acuerdoSoporte"
+          name="acuerdoSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onSoporteSelected($event)"
+        />
+        @if (formSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ formSoporteNombre }}</p>
+        }
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        Registrar Acuerdo
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showDetalleModal() && detalleAcuerdo(); as acuerdo) {
+  <app-modal [title]="'Acuerdo ' + acuerdo.idAcuerdo" (close)="showDetalleModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.entidad }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Estado</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.estado.label }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Valor Aprobado</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.valorAprobadoLabel }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Saldo por Desembolsar</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.saldoPorDesembolsarLabel }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Obligaciones Cubiertas</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.cuentaCobroIds.join(', ') || '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Soporte</p>
+          <p class="font-medium text-slate-900">{{ acuerdo.soporte?.nombreArchivo ?? '—' }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Cambiar estado:</span>
+        @for (estado of estados; track estado) {
+          @if (estado !== acuerdo.estado.label) {
+            <button
+              type="button"
+              class="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              (click)="cambiarEstado(acuerdo, estado)"
+            >
+              {{ estado }}
+            </button>
+          }
+        }
+      </div>
+
+      <div>
+        <div class="mb-1.5 flex items-center justify-between">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Desembolsos</p>
+          <button
+            type="button"
+            class="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+            (click)="openDesembolsoModal()"
+          >
+            + Registrar Desembolso
+          </button>
+        </div>
+        @if (desembolsosDe(acuerdo.idAcuerdo).length === 0) {
+          <p class="text-xs text-slate-400">Aún no se han registrado desembolsos para este acuerdo.</p>
+        } @else {
+          <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
+            @for (desembolso of desembolsosDe(acuerdo.idAcuerdo); track desembolso.idDesembolso) {
+              <div class="flex items-center justify-between px-3 py-2">
+                <span>{{ desembolso.idDesembolso }} · {{ desembolso.tipo }} · {{ desembolso.fecha }}</span>
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-slate-900">{{ desembolso.valorLabel }}</span>
+                  @if (estadoDesembolso(desembolso.idDesembolso); as estadoDes) {
+                    <span class="text-xs text-slate-400">{{ estadoDes.label }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">Histórico de Estados</p>
+        <div class="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-3 text-xs text-slate-500">
+          @for (registro of acuerdo.historialEstados; track registro.fecha + registro.estado) {
+            <div class="flex items-center justify-between">
+              <span>{{ registro.estado }}</span>
+              <span>{{ registro.fecha }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showDetalleModal.set(false)"
+      >
+        Cerrar
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showDesembolsoModal() && detalleAcuerdo(); as acuerdo) {
+  <app-modal [title]="'Registrar Desembolso — ' + acuerdo.idAcuerdo" (close)="showDesembolsoModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div class="rounded-lg bg-slate-50 px-4 py-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Saldo por Desembolsar</span>
+          <span class="font-semibold text-slate-900">{{ acuerdo.saldoPorDesembolsarLabel }}</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="desTipo" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo*</label>
+          <select
+            id="desTipo"
+            name="desTipo"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="desembolsoTipo"
+          >
+            @for (tipo of tiposDesembolso; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="desFecha" class="mb-1.5 block text-sm font-medium text-slate-700">Fecha*</label>
+          <input
+            id="desFecha"
+            name="desFecha"
+            type="date"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="desembolsoFecha"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="desValor" class="mb-1.5 block text-sm font-medium text-slate-700">Valor Desembolsado*</label>
+        <input
+          id="desValor"
+          name="desValor"
+          type="number"
+          min="0"
+          placeholder="0"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="desembolsoValor"
+        />
+      </div>
+
+      <div>
+        <label for="desSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="desSoporte"
+          name="desSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onDesembolsoSoporteSelected($event)"
+        />
+        @if (desembolsoSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ desembolsoSoporteNombre }}</p>
+        }
+      </div>
+
+      @if (desembolsoError) {
+        <p class="text-sm font-medium text-red-600">{{ desembolsoError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showDesembolsoModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitDesembolso()"
+      >
+        Registrar Desembolso
+      </button>
+    </div>
+  </app-modal>
+}
