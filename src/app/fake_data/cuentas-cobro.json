@@ -1,0 +1,84 @@
+[
+  {
+    "idCuenta": "CC-2026-001",
+    "tipo": "Individual",
+    "entidadId": "alcaldia-municipal-de-muestra",
+    "entidad": "Alcaldía Municipal de Muestra",
+    "liquidacionIds": ["LQ-2026-002"],
+    "pensionadoIds": ["maria-rodriguez-salinas"],
+    "pensionados": ["María Rodríguez Salinas"],
+    "capital": 52400000,
+    "capitalLabel": "$52,400,000",
+    "fechaGeneracion": "2026-02-01",
+    "fechaRecepcion": "2026-02-05",
+    "fechaVencimiento": "2026-03-07",
+    "historialRecepcion": [
+      {
+        "fechaRecepcion": "2026-02-05",
+        "soporte": { "nombreArchivo": "radicado-CC-2026-001.xlsx", "fechaCargue": "2026-02-05" },
+        "registradoPor": "admin@sgdp.gov.co",
+        "timestamp": "2026-02-05 08:40"
+      }
+    ],
+    "estado": { "label": "Radicada", "variant": "success" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-002",
+    "tipo": "Individual",
+    "entidadId": "instituto-distrital-de-prueba",
+    "entidad": "Instituto Distrital de Prueba",
+    "liquidacionIds": ["LQ-2026-003"],
+    "pensionadoIds": ["carlos-herrera-mendoza"],
+    "pensionados": ["Carlos Herrera Mendoza"],
+    "capital": 31800000,
+    "capitalLabel": "$31,800,000",
+    "fechaGeneracion": "2026-08-28",
+    "fechaRecepcion": null,
+    "fechaVencimiento": null,
+    "historialRecepcion": [],
+    "estado": { "label": "Pendiente", "variant": "warning" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-003",
+    "tipo": "Consolidada",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidad": "Gobernación de Ejemplo",
+    "liquidacionIds": ["LQ-2026-001", "LQ-2026-004"],
+    "pensionadoIds": ["juan-perez-gomez", "ana-lucia-torres-vega"],
+    "pensionados": ["Juan Pérez Gómez", "Ana Lucía Torres Vega"],
+    "capital": 106300000,
+    "capitalLabel": "$106,300,000",
+    "fechaGeneracion": "2026-08-20",
+    "fechaRecepcion": "2026-08-25",
+    "fechaVencimiento": "2026-09-24",
+    "historialRecepcion": [
+      {
+        "fechaRecepcion": "2026-08-25",
+        "soporte": { "nombreArchivo": "radicado-CC-2026-003.xlsx", "fechaCargue": "2026-08-25" },
+        "registradoPor": "admin@sgdp.gov.co",
+        "timestamp": "2026-08-25 10:15"
+      }
+    ],
+    "estado": { "label": "Radicada", "variant": "success" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-004",
+    "tipo": "Individual",
+    "entidadId": "secretaria-ejemplo-norte",
+    "entidad": "Secretaría Ejemplo Norte",
+    "liquidacionIds": ["LQ-2026-005"],
+    "pensionadoIds": ["roberto-fuentes-diaz"],
+    "pensionados": ["Roberto Fuentes Díaz"],
+    "capital": 18900000,
+    "capitalLabel": "$18,900,000",
+    "fechaGeneracion": "2026-03-01",
+    "fechaRecepcion": null,
+    "fechaVencimiento": null,
+    "historialRecepcion": [],
+    "estado": { "label": "Anulada", "variant": "neutral" },
+    "creadoPor": "admin@sgdp.gov.co"
+  }
+]

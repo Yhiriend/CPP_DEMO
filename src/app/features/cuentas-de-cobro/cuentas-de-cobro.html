@@ -2,28 +2,40 @@
   <app-breadcrumb [items]="['SGDP', 'Cuentas de Cobro']" />
 
   <div>
-    <h1 class="text-lg font-semibold text-slate-900">Consultar Cuentas de Cobro</h1>
+    <h1 class="text-lg font-semibold text-slate-900">Cuentas de Cobro</h1>
     <p class="mt-1 text-sm text-slate-500">
-      Módulo 6 — Gestión y seguimiento de cuentas de cobro emitidas a entidades.
+      Generación de cuentas de cobro individuales y consolidadas, y registro de su fecha de recepción.
     </p>
   </div>
 
   <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
     <span class="text-sm font-medium text-slate-600">Filtros:</span>
-    <select
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
-    >
-      <option>Todas las entidades</option>
-    </select>
-    <select
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
-    >
-      <option>Cualquier estado</option>
-    </select>
     <input
-      type="date"
-      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+      type="search"
+      name="cuentaSearch"
+      placeholder="ID, entidad o pensionado"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="buscar()"
     />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEstado"
+    >
+      <option value="">Cualquier estado</option>
+      @for (estado of estadosFiltro; track estado) {
+        <option [value]="estado">{{ estado }}</option>
+      }
+    </select>
     <button
       type="button"
       class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
@@ -31,10 +43,10 @@
     >
       Buscar
     </button>
-    <span class="ml-auto text-xs font-medium text-slate-400">{{ cuentasCobro.length }} registros</span>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredCuentas().length }} registros</span>
   </div>
 
-  <app-table title="Historial de Cuentas de Cobro" [columns]="columns" [rows]="cuentasCobro">
+  <app-table title="Historial de Cuentas de Cobro" [columns]="columns" [rows]="filteredCuentas()">
     <div table-actions class="flex items-center gap-2">
       <button
         type="button"
@@ -47,7 +59,7 @@
       <button
         type="button"
         class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-        (click)="generarCuenta()"
+        (click)="openGenerarModal()"
       >
         <svg lucidePlus class="h-4 w-4"></svg>
         Generar Cuenta
@@ -55,13 +67,37 @@
     </div>
 
     <ng-template #rowActions let-row>
-      <button
-        type="button"
-        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-        (click)="verCuenta(row)"
-      >
-        Ver Cuenta
-      </button>
+      <div class="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          [attr.aria-label]="'Ver ' + row.idCuenta"
+          [title]="'Ver detalle'"
+          (click)="verCuenta(row)"
+        >
+          <svg lucideEye class="h-4 w-4"></svg>
+        </button>
+        @if (row.estadoVisual.label !== 'Anulada') {
+          <button
+            type="button"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            [attr.aria-label]="'Registrar recepción de ' + row.idCuenta"
+            [title]="row.fechaRecepcion ? 'Actualizar recepción' : 'Registrar recepción'"
+            (click)="openRecepcionModal(row)"
+          >
+            <svg lucideCalendarCheck class="h-4 w-4"></svg>
+          </button>
+          <button
+            type="button"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
+            [attr.aria-label]="'Anular ' + row.idCuenta"
+            title="Anular"
+            (click)="anular(row)"
+          >
+            <svg lucideBan class="h-4 w-4"></svg>
+          </button>
+        }
+      </div>
     </ng-template>
   </app-table>
 
@@ -70,9 +106,300 @@
   >
     <span class="font-semibold text-slate-900">Total Emitido</span>
     <div class="flex flex-wrap items-center gap-8">
-      <span class="font-semibold text-slate-900">{{ totalCapitalLabel }}</span>
-      <span class="font-semibold text-slate-900">{{ totalInteresesLabel }}</span>
-      <span class="text-slate-500">{{ resumenEstados }}</span>
+      <span class="font-semibold text-slate-900">{{ totalCapitalLabel() }}</span>
+      <span class="font-semibold text-slate-900">{{ totalInteresesLabel() }}</span>
+      <span class="text-slate-500">{{ resumenEstados() }}</span>
     </div>
   </div>
 </div>
+
+@if (showGenerarModal()) {
+  <app-modal title="Generar Cuenta de Cobro" (close)="showGenerarModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Tipo*</label>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="flex-1 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors"
+            [class]="formTipo === 'Individual' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+            (click)="formTipo = 'Individual'"
+          >
+            Individual
+          </button>
+          <button
+            type="button"
+            class="flex-1 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors"
+            [class]="formTipo === 'Consolidada' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+            (click)="formTipo = 'Consolidada'"
+          >
+            Consolidada
+          </button>
+        </div>
+      </div>
+
+      @if (formTipo === 'Individual') {
+        <div>
+          <label for="ccLiquidacion" class="mb-1.5 block text-sm font-medium text-slate-700">Liquidación*</label>
+          <select
+            id="ccLiquidacion"
+            name="ccLiquidacion"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formLiquidacionId"
+          >
+            <option value="" disabled>Seleccione...</option>
+            @for (liquidacion of liquidacionesDisponibles(); track liquidacion.idLiquidacion) {
+              <option [value]="liquidacion.idLiquidacion">
+                {{ liquidacion.idLiquidacion }} — {{ liquidacion.pensionado }} ({{ liquidacion.entidad }}) —
+                {{ liquidacion.capitalLabel }}
+              </option>
+            }
+          </select>
+          @if (liquidacionesDisponibles().length === 0) {
+            <p class="mt-1.5 text-xs text-amber-600">No hay liquidaciones disponibles sin facturar.</p>
+          }
+        </div>
+      } @else {
+        <div>
+          <label for="ccEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Entidad*</label>
+          <select
+            id="ccEntidad"
+            name="ccEntidad"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formEntidadId"
+          >
+            <option value="" disabled>Seleccione...</option>
+            @for (entidad of entidades(); track entidad.id) {
+              <option [value]="entidad.id">{{ entidad.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        @if (formEntidadId) {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Liquidaciones a incluir*</label>
+            @if (liquidacionesEntidadSeleccionada().length === 0) {
+              <p class="text-xs text-amber-600">Esta entidad no tiene liquidaciones disponibles sin facturar.</p>
+            }
+            <div class="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-3">
+              @for (liquidacion of liquidacionesEntidadSeleccionada(); track liquidacion.idLiquidacion) {
+                <label class="flex items-center gap-2 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    (change)="toggleLiquidacionConsolidada(liquidacion.idLiquidacion, $any($event.target).checked)"
+                  />
+                  {{ liquidacion.idLiquidacion }} — {{ liquidacion.pensionado }} — {{ liquidacion.capitalLabel }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <div>
+        <label for="ccEstado" class="mb-1.5 block text-sm font-medium text-slate-700">Estado Inicial*</label>
+        <select
+          id="ccEstado"
+          name="ccEstado"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formEstadoInicial"
+        >
+          @for (estado of estadosGenerables; track estado) {
+            <option [value]="estado">{{ estado }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="space-y-1 rounded-lg bg-slate-50 px-4 py-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Capital Base de Cobro (CCAL-003)</span>
+          <span class="font-semibold text-slate-900">{{ previewCapitalLabel }}</span>
+        </div>
+        <p class="text-xs text-slate-500">{{ previewValorEnLetras }}</p>
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showGenerarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitGenerar()"
+      >
+        Generar Cuenta
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showRecepcionModal() && recepcionCuenta(); as cuenta) {
+  <app-modal [title]="'Registrar Recepción — ' + cuenta.idCuenta" (close)="showRecepcionModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div>
+        <label for="ccFechaRecepcion" class="mb-1.5 block text-sm font-medium text-slate-700">Fecha de Recepción*</label>
+        <input
+          id="ccFechaRecepcion"
+          name="ccFechaRecepcion"
+          type="date"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="recepcionFecha"
+        />
+      </div>
+
+      <div>
+        <label for="ccSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="ccSoporte"
+          name="ccSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onSoporteSelected($event)"
+        />
+        @if (recepcionSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ recepcionSoporteNombre }}</p>
+        }
+      </div>
+
+      <div class="rounded-lg bg-slate-50 px-4 py-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Fecha de Vencimiento (CCAL-005)</span>
+          <span class="font-semibold text-slate-900">{{ previewVencimiento }}</span>
+        </div>
+        <p class="mt-1 text-xs text-slate-400">Fecha de recibido + 30 días calendario.</p>
+      </div>
+
+      @if (cuenta.historialRecepcion.length > 0) {
+        <div>
+          <p class="mb-1.5 text-sm font-medium text-slate-700">Histórico de Registros</p>
+          <div class="max-h-32 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-3 text-xs text-slate-500">
+            @for (registro of cuenta.historialRecepcion; track registro.timestamp) {
+              <div class="flex items-center justify-between">
+                <span>{{ registro.fechaRecepcion }} · {{ registro.soporte?.nombreArchivo ?? 'Sin soporte' }}</span>
+                <span>{{ registro.timestamp }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (recepcionError) {
+        <p class="text-sm font-medium text-red-600">{{ recepcionError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showRecepcionModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitRecepcion()"
+      >
+        {{ cuenta.fechaRecepcion ? 'Actualizar Recepción' : 'Registrar Recepción' }}
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showDetalleModal() && detalleCuenta(); as cuenta) {
+  <app-modal [title]="'Cuenta de Cobro ' + cuenta.idCuenta" (close)="showDetalleModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad</p>
+          <p class="font-medium text-slate-900">{{ cuenta.entidad }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Tipo</p>
+          <p class="font-medium text-slate-900">{{ cuenta.tipo }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fecha Generación</p>
+          <p class="font-medium text-slate-900">{{ cuenta.fechaGeneracion }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fecha Recepción</p>
+          <p class="font-medium text-slate-900">{{ cuenta.fechaRecepcion ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fecha Vencimiento</p>
+          <p class="font-medium text-slate-900">{{ cuenta.fechaVencimiento ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Estado</p>
+          <p class="font-medium text-slate-900">{{ cuenta.estadoVisual.label }}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">
+          Liquidaciones Incluidas ({{ cuenta.liquidacionIds.length }})
+        </p>
+        <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
+          @for (liquidacion of liquidacionesDe(cuenta); track liquidacion.idLiquidacion) {
+            <div class="flex items-center justify-between px-3 py-2">
+              <span>{{ liquidacion.idLiquidacion }} · {{ liquidacion.periodo }}</span>
+              <span class="font-medium text-slate-900">{{ liquidacion.capitalLabel }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">
+          Pensionados y Beneficiarios ({{ cuenta.pensionadoIds.length }})
+        </p>
+        <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
+          @for (pensionadoId of cuenta.pensionadoIds; track pensionadoId; let i = $index) {
+            <div class="flex items-center justify-between px-3 py-2">
+              <span>{{ cuenta.pensionados[i] }}</span>
+              <span class="text-xs text-slate-400">{{ beneficiariosCount(pensionadoId) }} beneficiarios</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="space-y-1 rounded-lg bg-slate-50 px-4 py-3">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Capital Base (CCAL-003)</span>
+          <span class="font-semibold text-slate-900">{{ cuenta.capitalLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Intereses ({{ interesesDe(cuenta).diasMora }} días mora)</span>
+          <span class="font-semibold text-slate-900">{{ interesesDe(cuenta).interesLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Valor Total (CCAL-004)</span>
+          <span class="font-semibold text-slate-900">{{ cuenta.valorTotalLabel }}</span>
+        </div>
+        <p class="pt-1 text-xs text-slate-400">{{ valorEnLetrasDe(cuenta) }}</p>
+      </div>
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showDetalleModal.set(false)"
+      >
+        Cerrar
+      </button>
+    </div>
+  </app-modal>
+}
