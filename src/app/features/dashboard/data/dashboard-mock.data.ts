@@ -1,10 +1,11 @@
-import { DashboardStat, EntityDebt, PaymentEntry, QuickAction } from '../models/dashboard.model';
+import { StatCardData } from '../../../shared/ui/stat-card/stat-card.model';
+import { EntityDebt, PaymentEntry, QuickAction } from '../models/dashboard.model';
 
-export const DASHBOARD_STATS: readonly DashboardStat[] = [
-  { label: 'Cartera Total', value: '$4,823,500M', icon: 'wallet', trendLabel: '— vs anterior' },
-  { label: 'Intereses Generados', value: '$312,400M', icon: 'trending-up', trendLabel: '— vs anterior' },
-  { label: 'Pagos Pendientes de Imputar', value: '47', icon: 'clock', trendLabel: '— vs anterior' },
-  { label: 'Acuerdos FONPET Pendientes', value: '12', icon: 'file-text', trendLabel: '— vs anterior' },
+export const DASHBOARD_STATS: readonly StatCardData[] = [
+  { label: 'Cartera Total', value: '$4,823,500M', icon: 'wallet', subtitle: '— vs anterior' },
+  { label: 'Intereses Generados', value: '$312,400M', icon: 'trending-up', subtitle: '— vs anterior' },
+  { label: 'Pagos Pendientes de Imputar', value: '47', icon: 'clock', subtitle: '— vs anterior' },
+  { label: 'Acuerdos FONPET Pendientes', value: '12', icon: 'file-text', subtitle: '— vs anterior' },
 ];
 
 export const ENTITIES_WITH_HIGHEST_DEBT: readonly EntityDebt[] = [

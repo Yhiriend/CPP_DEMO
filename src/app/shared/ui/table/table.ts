@@ -1,7 +1,13 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, TemplateRef, computed, contentChild, input, signal } from '@angular/core';
 
-import { TABLE_BADGE_VARIANT_CLASSES, TableBadgeVariant, TableColumn, isTableBadge } from './table.model';
+import {
+  TABLE_BADGE_VARIANT_CLASSES,
+  TableBadgeVariant,
+  TableColumn,
+  isTableBadge,
+  isTableProgress,
+} from './table.model';
 
 /**
  * Generic data table with a toolbar slot ([table-actions]), an optional
@@ -27,6 +33,7 @@ export class Table<T extends object> {
   >('rowActions', { read: TemplateRef });
 
   protected readonly isTableBadge = isTableBadge;
+  protected readonly isTableProgress = isTableProgress;
 
   protected readonly currentPage = signal(1);
 

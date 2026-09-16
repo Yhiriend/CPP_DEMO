@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { EntitiesDebtList } from './components/entities-debt-list/entities-debt-list';
 import { PaymentsOverview } from './components/payments-overview/payments-overview';
 import { QuickActions } from './components/quick-actions/quick-actions';
-import { StatCard } from './components/stat-card/stat-card';
 import { DashboardService } from './dashboard.service';
 
 @Component({

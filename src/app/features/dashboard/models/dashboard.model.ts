@@ -1,10 +1,3 @@
-export interface DashboardStat {
-  readonly label: string;
-  readonly value: string;
-  readonly icon: string;
-  readonly trendLabel: string;
-}
-
 export interface EntityDebt {
   readonly name: string;
   readonly percentage: number;

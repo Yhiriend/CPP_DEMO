@@ -30,6 +30,10 @@ export const routes: Routes = [
         path: 'entidades',
         loadChildren: () => import('./features/entidades/entidades.routes').then((m) => m.ENTIDADES_ROUTES),
       },
+      {
+        path: 'cartera',
+        loadChildren: () => import('./features/cartera/cartera.routes').then((m) => m.CARTERA_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

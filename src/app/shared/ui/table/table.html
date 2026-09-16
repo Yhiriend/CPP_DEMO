@@ -49,6 +49,15 @@
                   >
                     {{ value.label }}
                   </span>
+                } @else if (isTableProgress(value)) {
+                  <div class="flex items-center justify-end gap-2">
+                    <span class="w-10 shrink-0 text-right text-xs font-medium text-slate-500">
+                      {{ value.label ?? value.percentage + '%' }}
+                    </span>
+                    <div class="h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-slate-100">
+                      <div class="h-full rounded-full bg-slate-900" [style.width.%]="value.percentage"></div>
+                    </div>
+                  </div>
                 } @else {
                   {{ value }}
                 }

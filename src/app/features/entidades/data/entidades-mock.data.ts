@@ -76,6 +76,21 @@ export const ENTIDADES: readonly Entidad[] = [
     ultimaModificacion: '2026-03-05 14:52',
     modificadoPor: 'a.garcia@sgdp.gov.co',
   },
+  {
+    id: 'fondo-pens-ejemplo-oriental',
+    codigoNit: '850.333.444-2',
+    nombre: 'Fondo Pens. Ejemplo Oriental',
+    tipo: 'Fondo Pensional',
+    totalPensionados: '156',
+    saldoCarteraTotal: '$45,900M',
+    estado: { label: 'Activa', variant: 'success' },
+    deudaTotalActual: '$45,900M',
+    ultimoPago: '20/04/2026',
+    creadoPor: 'admin@sgdp.gov.co',
+    fechaCreacion: '2022-02-14',
+    ultimaModificacion: '2026-04-20 10:05',
+    modificadoPor: 'a.garcia@sgdp.gov.co',
+  },
 ];
 
 export const OBLIGACIONES_POR_ENTIDAD: Readonly<Record<string, readonly ObligacionCartera[]>> = {

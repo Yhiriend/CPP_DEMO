@@ -22,3 +22,12 @@ export const TABLE_BADGE_VARIANT_CLASSES: Record<TableBadgeVariant, string> = {
 export function isTableBadge(value: unknown): value is TableBadge {
   return typeof value === 'object' && value !== null && 'label' in value && 'variant' in value;
 }
+
+export interface TableProgress {
+  readonly percentage: number;
+  readonly label?: string;
+}
+
+export function isTableProgress(value: unknown): value is TableProgress {
+  return typeof value === 'object' && value !== null && 'percentage' in value;
+}

@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
 
-import { DashboardStat } from '../../models/dashboard.model';
+import { StatCardData } from './stat-card.model';
 
 @Component({
   selector: 'app-stat-card',
@@ -9,5 +9,5 @@ import { DashboardStat } from '../../models/dashboard.model';
   templateUrl: './stat-card.html',
 })
 export class StatCard {
-  readonly stat = input.required<DashboardStat>();
+  readonly stat = input.required<StatCardData>();
 }
