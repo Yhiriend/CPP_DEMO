@@ -1,0 +1,78 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Pensionados']" />
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <input
+      type="text"
+      name="documentoBusqueda"
+      placeholder="Cédula / Documento"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="documentoBusqueda"
+      (keyup.enter)="search()"
+    />
+    <input
+      type="text"
+      name="nombreBusqueda"
+      placeholder="Nombres y Apellidos"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="nombreBusqueda"
+      (keyup.enter)="search()"
+    />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 focus:border-slate-400 focus:outline-none"
+    >
+      <option>Cualquier estado</option>
+    </select>
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="search()"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">
+      {{ filteredPensionados().length }}
+      {{ filteredPensionados().length === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
+    </span>
+  </div>
+
+  <app-table title="Directorio General de Pensionados" [columns]="columns" [rows]="filteredPensionados()">
+    <div table-actions>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Crear Pensionado
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+      >
+        Ver Detalle
+      </button>
+    </ng-template>
+  </app-table>
+
+  <div
+    class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs text-slate-500"
+  >
+    <span class="flex items-center gap-1.5">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+      Módulo: 4 — Pensionados
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+      DB: Conectada — PG/14
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+      Sesión: C. Torres — Activa
+    </span>
+    <span class="ml-auto text-slate-400">Última sync: 2026-06-19 10:15:33</span>
+  </div>
+</div>

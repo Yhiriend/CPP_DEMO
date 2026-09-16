@@ -31,6 +31,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/entidades/entidades.routes').then((m) => m.ENTIDADES_ROUTES),
       },
       {
+        path: 'pensionados',
+        loadChildren: () => import('./features/pensionados/pensionados.routes').then((m) => m.PENSIONADOS_ROUTES),
+      },
+      {
         path: 'cartera',
         loadChildren: () => import('./features/cartera/cartera.routes').then((m) => m.CARTERA_ROUTES),
       },
