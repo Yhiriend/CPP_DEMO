@@ -65,6 +65,10 @@ export const routes: Routes = [
         path: 'reportes',
         loadChildren: () => import('./features/reportes/reportes.routes').then((m) => m.REPORTES_ROUTES),
       },
+      {
+        path: 'alertas',
+        loadChildren: () => import('./features/alertas/alertas.routes').then((m) => m.ALERTAS_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

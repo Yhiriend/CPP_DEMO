@@ -16,6 +16,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Cuentas de Cobro', path: '/cuentas-de-cobro', icon: 'file-text', implemented: true },
   { label: 'Usuarios', path: '/usuarios', icon: 'users' },
   { label: 'Reportes', path: '/reportes', icon: 'bar-chart-3', implemented: true },
-  { label: 'Alertas', path: '/alertas', icon: 'bell' },
+  { label: 'Alertas', path: '/alertas', icon: 'bell', implemented: true },
   { label: 'Sincronización', path: '/sincronizacion', icon: 'refresh-cw' },
 ];

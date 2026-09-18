@@ -1,0 +1,86 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Alertas']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Alertas de Cartera</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Vencimientos próximos, obligaciones vencidas, pagos sin identificar y recursos sin aplicar — derivado en
+      vivo de Cuentas de Cobro, Pagos e Imputaciones.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-stat-card [stat]="kpi" />
+    }
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <input
+      type="search"
+      name="alertaSearch"
+      placeholder="Entidad o detalle"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="buscar()"
+    />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterCategoria"
+    >
+      <option value="">Todas las categorías</option>
+      @for (categoria of categorias; track categoria) {
+        <option [value]="categoria">{{ categoria }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterSeveridad"
+    >
+      <option value="">Cualquier severidad</option>
+      @for (severidad of severidades; track severidad) {
+        <option [value]="severidad">{{ severidad }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredAlertas().length }} alertas</span>
+  </div>
+
+  <app-table title="Alertas" [columns]="columns" [rows]="filteredAlertas()">
+    <div table-actions>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="exportar()"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+    </div>
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verAlerta(row)"
+      >
+        Ver
+      </button>
+    </ng-template>
+  </app-table>
+</div>
