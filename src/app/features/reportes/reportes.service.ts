@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { todayIso, nowTimestamp } from '../../shared/utils/date';
 import { AcuerdosService } from '../acuerdos/acuerdos.service';
 import { AcuerdoFonpet } from '../acuerdos/models/acuerdo.model';
@@ -32,10 +33,10 @@ export class ReportesService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _historico = signal<ReporteGenerado[]>([]);
+  private readonly _historico = persistedSignal<ReporteGenerado[]>('reportes-historico', []);
   readonly historico = this._historico.asReadonly();
 
-  private correlativo = 0;
+  private correlativo = this._historico().length;
 
   generar(filtros: FiltrosReporte): ReporteGenerado {
     const entidad = filtros.entidadId ? this.entidadesService.getEntidadById(filtros.entidadId) : undefined;

@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadge } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import IMPUTACIONES_SEED from '../../fake_data/imputaciones.json';
@@ -75,10 +76,10 @@ export class ImputacionesService {
   private readonly acuerdosService = inject(AcuerdosService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _imputaciones = signal<Imputacion[]>(IMPUTACIONES_SEED as Imputacion[]);
+  private readonly _imputaciones = persistedSignal<Imputacion[]>('imputaciones', IMPUTACIONES_SEED as Imputacion[]);
   readonly imputaciones = this._imputaciones.asReadonly();
 
-  private readonly _saldosAFavor = signal<SaldoAFavor[]>(SALDOS_A_FAVOR_SEED as SaldoAFavor[]);
+  private readonly _saldosAFavor = persistedSignal<SaldoAFavor[]>('saldos-a-favor', SALDOS_A_FAVOR_SEED as SaldoAFavor[]);
   readonly saldosAFavor = this._saldosAFavor.asReadonly();
 
   private correlativo = this._imputaciones().length;

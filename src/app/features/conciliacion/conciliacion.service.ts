@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import CONCILIACIONES_SEED from '../../fake_data/conciliaciones.json';
@@ -38,7 +39,7 @@ export class ConciliacionService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _conciliaciones = signal<Conciliacion[]>(CONCILIACIONES_SEED as Conciliacion[]);
+  private readonly _conciliaciones = persistedSignal<Conciliacion[]>('conciliaciones', CONCILIACIONES_SEED as Conciliacion[]);
   readonly conciliaciones = this._conciliaciones.asReadonly();
 
   private correlativo = this._conciliaciones().length;

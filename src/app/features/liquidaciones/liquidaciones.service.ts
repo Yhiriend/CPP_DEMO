@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { calcularPorcentajeConcurrencia, calcularValorCuotaParte } from '../../shared/utils/liquidacion';
 import LIQUIDACIONES_SEED from '../../fake_data/liquidaciones.json';
@@ -22,7 +23,7 @@ export class LiquidacionesService {
   private readonly pensionadosService = inject(PensionadosService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _liquidaciones = signal<Liquidacion[]>(LIQUIDACIONES_SEED as Liquidacion[]);
+  private readonly _liquidaciones = persistedSignal<Liquidacion[]>('liquidaciones', LIQUIDACIONES_SEED as Liquidacion[]);
   readonly liquidaciones = this._liquidaciones.asReadonly();
 
   private correlativo = this._liquidaciones().length;

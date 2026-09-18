@@ -1,7 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { EntidadesService } from '../entidades/entidades.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { uniqueSlug } from '../../shared/utils/slug';
 import PENSIONADOS_SEED from '../../fake_data/pensionados.json';
@@ -22,7 +23,7 @@ export class PensionadosService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _pensionados = signal<Pensionado[]>(PENSIONADOS_SEED as Pensionado[]);
+  private readonly _pensionados = persistedSignal<Pensionado[]>('pensionados', PENSIONADOS_SEED as Pensionado[]);
   readonly pensionados = this._pensionados.asReadonly();
 
   getPensionadoById(id: string): Pensionado | undefined {

@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import ACUERDOS_SEED from '../../fake_data/acuerdos.json';
@@ -30,10 +31,10 @@ export class AcuerdosService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _acuerdos = signal<AcuerdoFonpet[]>(ACUERDOS_SEED as AcuerdoFonpet[]);
+  private readonly _acuerdos = persistedSignal<AcuerdoFonpet[]>('acuerdos', ACUERDOS_SEED as AcuerdoFonpet[]);
   readonly acuerdos = this._acuerdos.asReadonly();
 
-  private readonly _desembolsos = signal<DesembolsoFonpet[]>(DESEMBOLSOS_SEED as DesembolsoFonpet[]);
+  private readonly _desembolsos = persistedSignal<DesembolsoFonpet[]>('desembolsos', DESEMBOLSOS_SEED as DesembolsoFonpet[]);
   readonly desembolsos = this._desembolsos.asReadonly();
 
   private correlativoAcuerdo = this._acuerdos().length;

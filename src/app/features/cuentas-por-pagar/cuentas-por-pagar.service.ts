@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import { calcularPorcentajeConcurrencia, calcularValorCuotaParte } from '../../shared/utils/liquidacion';
@@ -45,7 +46,7 @@ export class CuentasPorPagarService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _obligaciones = signal<ObligacionPorPagar[]>(OBLIGACIONES_SEED as ObligacionPorPagar[]);
+  private readonly _obligaciones = persistedSignal<ObligacionPorPagar[]>('obligaciones-por-pagar', OBLIGACIONES_SEED as ObligacionPorPagar[]);
   readonly obligaciones = this._obligaciones.asReadonly();
 
   private correlativo = this._obligaciones().length;

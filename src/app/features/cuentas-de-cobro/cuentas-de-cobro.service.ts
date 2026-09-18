@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadge, TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { addDays, nowTimestamp, siguienteDiaHabil, todayIso } from '../../shared/utils/date';
 import { numeroALetras } from '../../shared/utils/numero-a-letras';
@@ -48,7 +49,7 @@ export class CuentasDeCobroService {
   private readonly interesesCalculoService = inject(InteresesCalculoService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _cuentasCobro = signal<CuentaCobro[]>(CUENTAS_COBRO_SEED as CuentaCobro[]);
+  private readonly _cuentasCobro = persistedSignal<CuentaCobro[]>('cuentas-cobro', CUENTAS_COBRO_SEED as CuentaCobro[]);
   readonly cuentasCobro = this._cuentasCobro.asReadonly();
 
   private correlativo = this._cuentasCobro().length;

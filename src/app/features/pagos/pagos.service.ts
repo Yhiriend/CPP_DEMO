@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import PAGOS_SEED from '../../fake_data/pagos.json';
 import { EntidadesService } from '../entidades/entidades.service';
 import { PagoFormValue, PagoRecibido } from './models/pago.model';
@@ -13,7 +14,7 @@ export class PagosService {
   private readonly entidadesService = inject(EntidadesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _pagos = signal<PagoRecibido[]>(PAGOS_SEED as PagoRecibido[]);
+  private readonly _pagos = persistedSignal<PagoRecibido[]>('pagos', PAGOS_SEED as PagoRecibido[]);
   readonly pagos = this._pagos.asReadonly();
 
   private correlativo = this._pagos().length;

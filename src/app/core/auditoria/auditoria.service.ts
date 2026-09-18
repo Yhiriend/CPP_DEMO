@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { nowTimestamp, todayIso } from '../../shared/utils/date';
 import AUDITORIA_SEED from '../../fake_data/auditoria.json';
 import { EventoAuditoria, RegistrarEventoInput } from './models/evento-auditoria.model';
@@ -14,7 +15,7 @@ const SESSION_USER = 'admin@sgdp.gov.co';
  */
 @Injectable({ providedIn: 'root' })
 export class AuditoriaService {
-  private readonly _eventos = signal<EventoAuditoria[]>(AUDITORIA_SEED as EventoAuditoria[]);
+  private readonly _eventos = persistedSignal<EventoAuditoria[]>('auditoria', AUDITORIA_SEED as EventoAuditoria[]);
   readonly eventos = this._eventos.asReadonly();
 
   private correlativo = this._eventos().length;

@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { uniqueSlug } from '../../shared/utils/slug';
 import BENEFICIARIOS_SEED from '../../fake_data/beneficiarios.json';
@@ -15,7 +16,7 @@ const TIPO_DOCUMENTO_VARIANT: TableBadgeVariant = 'neutral';
 /** Backed by mock data for now; swap for an HTTP-backed store once the API is ready. */
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
-  private readonly _beneficiarios = signal<Beneficiario[]>(BENEFICIARIOS_SEED as Beneficiario[]);
+  private readonly _beneficiarios = persistedSignal<Beneficiario[]>('beneficiarios', BENEFICIARIOS_SEED as Beneficiario[]);
   readonly beneficiarios = this._beneficiarios.asReadonly();
 
   getByPensionado(pensionadoId: string): readonly Beneficiario[] {

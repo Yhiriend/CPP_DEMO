@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { todayIso } from '../../shared/utils/date';
 import CASOS_SEED from '../../fake_data/casos-juridicos.json';
@@ -54,7 +55,7 @@ export class JuridicaService {
   private readonly imputacionesService = inject(ImputacionesService);
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _casos = signal<CasoJuridico[]>(CASOS_SEED as CasoJuridico[]);
+  private readonly _casos = persistedSignal<CasoJuridico[]>('casos-juridicos', CASOS_SEED as CasoJuridico[]);
   readonly casos = this._casos.asReadonly();
 
   private casoCorrelativo = this._casos().length;

@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { todayIso } from '../../shared/utils/date';
 import DTF_RATES_SEED from '../../fake_data/dtf-rates.json';
 import { DtfRate, DtfRateFormValue } from './models/dtf-rate.model';
@@ -10,7 +11,7 @@ const SESSION_USER = 'a.garcia@min.gov.co';
 /** Backed by mock data for now; swap for an HTTP-backed store once the API is ready. */
 @Injectable({ providedIn: 'root' })
 export class ParametrizacionService {
-  private readonly _dtfRates = signal<DtfRate[]>(DTF_RATES_SEED as DtfRate[]);
+  private readonly _dtfRates = persistedSignal<DtfRate[]>('dtf-rates', DTF_RATES_SEED as DtfRate[]);
   readonly dtfRates = this._dtfRates.asReadonly();
 
   /** The DTF rate with the most recent vigencia — used as input for interest calculations. */

@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { persistedSignal } from '../../shared/persistence/persisted-signal';
 import { TableBadgeVariant } from '../../shared/ui/table/table.model';
 import { nowTimestamp, todayIso } from '../../shared/utils/date';
 import { uniqueSlug } from '../../shared/utils/slug';
@@ -21,7 +22,7 @@ const SESSION_USER = 'admin@sgdp.gov.co';
 export class EntidadesService {
   private readonly auditoriaService = inject(AuditoriaService);
 
-  private readonly _entidades = signal<Entidad[]>(ENTIDADES_SEED as Entidad[]);
+  private readonly _entidades = persistedSignal<Entidad[]>('entidades', ENTIDADES_SEED as Entidad[]);
   readonly entidades = this._entidades.asReadonly();
 
   getEntidadById(id: string): Entidad | undefined {
