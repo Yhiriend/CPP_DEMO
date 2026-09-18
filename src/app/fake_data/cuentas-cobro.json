@@ -104,5 +104,53 @@
     ],
     "estado": { "label": "Radicada", "variant": "success" },
     "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-006",
+    "tipo": "Individual",
+    "entidadId": "fondo-pens-ejemplo-oriental",
+    "entidad": "Fondo Pens. Ejemplo Oriental",
+    "liquidacionIds": ["LQ-2026-007"],
+    "pensionadoIds": ["luisa-ortiz-castano"],
+    "pensionados": ["Luisa Fernanda Ortiz Castaño"],
+    "capital": 15600000,
+    "capitalLabel": "$15,600,000",
+    "fechaGeneracion": "2026-06-10",
+    "fechaRecepcion": "2026-06-15",
+    "fechaVencimiento": "2026-07-16",
+    "historialRecepcion": [
+      {
+        "fechaRecepcion": "2026-06-15",
+        "soporte": { "nombreArchivo": "radicado-CC-2026-006.xlsx", "fechaCargue": "2026-06-15" },
+        "registradoPor": "admin@sgdp.gov.co",
+        "timestamp": "2026-06-15 09:20"
+      }
+    ],
+    "estado": { "label": "Radicada", "variant": "success" },
+    "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-007",
+    "tipo": "Individual",
+    "entidadId": "secretaria-ejemplo-norte",
+    "entidad": "Secretaría Ejemplo Norte",
+    "liquidacionIds": ["LQ-2026-005"],
+    "pensionadoIds": ["roberto-fuentes-diaz"],
+    "pensionados": ["Roberto Fuentes Díaz"],
+    "capital": 18900000,
+    "capitalLabel": "$18,900,000",
+    "fechaGeneracion": "2026-07-01",
+    "fechaRecepcion": "2026-07-06",
+    "fechaVencimiento": "2026-08-06",
+    "historialRecepcion": [
+      {
+        "fechaRecepcion": "2026-07-06",
+        "soporte": { "nombreArchivo": "radicado-CC-2026-007.xlsx", "fechaCargue": "2026-07-06" },
+        "registradoPor": "admin@sgdp.gov.co",
+        "timestamp": "2026-07-06 11:05"
+      }
+    ],
+    "estado": { "label": "Radicada", "variant": "success" },
+    "creadoPor": "admin@sgdp.gov.co"
   }
 ]
