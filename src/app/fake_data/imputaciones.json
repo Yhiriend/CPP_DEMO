@@ -7,7 +7,9 @@
     "cuentaCobroId": "CC-2026-002",
     "entidadId": "instituto-distrital-de-prueba",
     "entidad": "Instituto Distrital de Prueba",
-    "pensionados": ["Carlos Herrera Mendoza"],
+    "pensionados": [
+      "Carlos Herrera Mendoza"
+    ],
     "valorImputado": 31800000,
     "valorImputadoLabel": "$31,800,000",
     "valorAplicadoIntereses": 0,
@@ -24,7 +26,13 @@
     "excedenteLabel": "$0",
     "reglaAplicada": "Manual",
     "fecha": "2026-09-05",
-    "registradoPor": "admin@sgdp.gov.co"
+    "registradoPor": "admin@sgdp.gov.co",
+    "saldoAFavorId": null,
+    "saldoAFavorGeneradoId": null,
+    "reversada": false,
+    "motivoReversion": null,
+    "fechaReversion": null,
+    "reversadoPor": null
   },
   {
     "idImputacion": "IMP-2026-002",
@@ -34,7 +42,10 @@
     "cuentaCobroId": "CC-2026-003",
     "entidadId": "gobernacion-de-ejemplo",
     "entidad": "Gobernación de Ejemplo",
-    "pensionados": ["Juan Pérez Gómez", "Ana Lucía Torres Vega"],
+    "pensionados": [
+      "Juan Pérez Gómez",
+      "Ana Lucía Torres Vega"
+    ],
     "valorImputado": 84200000,
     "valorImputadoLabel": "$84,200,000",
     "valorAplicadoIntereses": 510543,
@@ -51,6 +62,12 @@
     "excedenteLabel": "$0",
     "reglaAplicada": "Manual",
     "fecha": "2026-09-10",
-    "registradoPor": "admin@sgdp.gov.co"
+    "registradoPor": "admin@sgdp.gov.co",
+    "saldoAFavorId": null,
+    "saldoAFavorGeneradoId": null,
+    "reversada": false,
+    "motivoReversion": null,
+    "fechaReversion": null,
+    "reversadoPor": null
   }
 ]

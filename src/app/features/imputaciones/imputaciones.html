@@ -4,11 +4,12 @@
   <div>
     <h1 class="text-lg font-semibold text-slate-900">Imputación de Pagos y Recursos FONPET</h1>
     <p class="mt-1 text-sm text-slate-500">
-      Aplicación de pagos y desembolsos FONPET a obligaciones específicas, primero a intereses y luego a capital.
+      Aplicación de pagos, desembolsos FONPET y saldos a favor a obligaciones específicas, primero a intereses y
+      luego a capital.
     </p>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
     @for (kpi of kpis(); track kpi.label) {
       <app-stat-card [stat]="kpi" />
     }
@@ -60,6 +61,24 @@
           </button>
         </ng-template>
       </app-table>
+    }
+
+    @case ('saldos-a-favor') {
+      <app-table title="Saldos a Favor Disponibles" [columns]="columnsSaldosAFavor" [rows]="saldosAFavorPendientes()">
+        <ng-template #rowActions let-row>
+          <button
+            type="button"
+            class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-800"
+            (click)="abrirImputarSaldoAFavor(row)"
+          >
+            Aplicar
+          </button>
+        </ng-template>
+      </app-table>
+      <p class="text-xs text-slate-400">
+        CCAL-022 — gestión de excepciones de recaudo: un excedente de pago se puede registrar como saldo a favor de
+        la entidad y aplicarlo después a otra obligación suya.
+      </p>
     }
 
     @case ('historico') {
@@ -115,13 +134,24 @@
         </div>
 
         <ng-template #rowActions let-row>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-            (click)="verDetalle(row)"
-          >
-            Ver Detalle
-          </button>
+          <div class="flex items-center justify-end gap-1.5">
+            <button
+              type="button"
+              class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              (click)="verDetalle(row)"
+            >
+              Ver Detalle
+            </button>
+            @if (!row.reversada && puedeReversar(row)) {
+              <button
+                type="button"
+                class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+                (click)="abrirReversar(row)"
+              >
+                Reversar
+              </button>
+            }
+          </div>
         </ng-template>
       </app-table>
     }
@@ -165,7 +195,7 @@
                 <option [value]="cuenta.idCuenta">{{ cuenta.idCuenta }} — {{ cuenta.capitalLabel }}</option>
               }
             </select>
-            @if (!esDesembolso()) {
+            @if (permiteObligacionMasAntigua()) {
               <button
                 type="button"
                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
@@ -175,11 +205,7 @@
               </button>
             }
           </div>
-          @if (esDesembolso()) {
-            <p class="mt-1.5 text-xs text-slate-400">Solo se listan las obligaciones cubiertas por el acuerdo FONPET.</p>
-          } @else {
-            <p class="mt-1.5 text-xs text-slate-400">CCAL-019 — si no se indica, se aplica a la obligación más antigua.</p>
-          }
+          <p class="mt-1.5 text-xs text-slate-400">{{ partidaAyudaCuenta }}</p>
         }
       </div>
 
@@ -222,6 +248,12 @@
             <p class="pt-1 text-xs font-medium text-amber-600">
               Excedente de pago (CCAL-022): {{ prev.excedente | number: '1.0-0' }}
             </p>
+            @if (imputarPartida()?.kind !== 'saldo-a-favor') {
+              <label class="mt-1 flex items-center gap-2 text-xs font-medium text-slate-600">
+                <input type="checkbox" [(ngModel)]="formRegistrarExcedente" />
+                Registrar el excedente como saldo a favor de {{ partidaEntidad }}
+              </label>
+            }
           }
         </div>
       }
@@ -260,7 +292,7 @@
         </div>
         <div>
           <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Referencia</p>
-          <p class="font-medium text-slate-900">{{ imputacion.pagoId ?? imputacion.desembolsoId }}</p>
+          <p class="font-medium text-slate-900">{{ imputacion.pagoId ?? imputacion.desembolsoId ?? imputacion.saldoAFavorId }}</p>
         </div>
         <div>
           <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Cuenta de Cobro</p>
@@ -304,9 +336,20 @@
         @if (imputacion.excedente > 0) {
           <p class="pt-1 text-xs font-medium text-amber-600">
             Excedente de pago (CCAL-022): {{ imputacion.excedenteLabel }}
+            @if (imputacion.saldoAFavorGeneradoId) {
+              — registrado como saldo a favor {{ imputacion.saldoAFavorGeneradoId }}
+            }
           </p>
         }
       </div>
+
+      @if (imputacion.reversada) {
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p class="text-sm font-semibold text-red-700">Imputación reversada</p>
+          <p class="mt-1 text-xs text-red-600">{{ imputacion.motivoReversion }}</p>
+          <p class="mt-1 text-xs text-red-500">{{ imputacion.reversadoPor }} · {{ imputacion.fechaReversion }}</p>
+        </div>
+      }
 
       <p class="text-xs text-slate-400">Registrado por {{ imputacion.registradoPor }}.</p>
     </div>
@@ -318,6 +361,58 @@
         (click)="showDetalleModal.set(false)"
       >
         Cerrar
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showReversarModal() && reversarObjetivo(); as imputacion) {
+  <app-modal [title]="'Reversar ' + imputacion.idImputacion" (close)="showReversarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="rounded-lg bg-slate-50 px-4 py-3">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Valor Imputado</span>
+          <span class="font-medium text-slate-900">{{ imputacion.valorImputadoLabel }}</span>
+        </div>
+        <div class="mt-1 flex items-center justify-between">
+          <span class="text-slate-500">Cuenta de Cobro</span>
+          <span class="font-medium text-slate-900">{{ imputacion.cuentaCobroId }}</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500">
+        El reverso libera este valor para volver a imputarlo y aumenta de nuevo el saldo pendiente de la
+        obligación. Queda registrado en Auditoría junto con el motivo.
+      </p>
+      <div>
+        <label for="revMotivo" class="mb-1.5 block text-sm font-medium text-slate-700">Motivo del Reverso*</label>
+        <textarea
+          id="revMotivo"
+          name="revMotivo"
+          rows="3"
+          placeholder="Ej. La imputación se aplicó a la cuenta equivocada."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="reversarMotivo"
+        ></textarea>
+      </div>
+      @if (reversarError) {
+        <p class="text-sm font-medium text-red-600">{{ reversarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showReversarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+        (click)="submitReversar()"
+      >
+        Reversar Imputación
       </button>
     </div>
   </app-modal>

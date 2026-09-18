@@ -8,7 +8,7 @@ import { Modal } from '../../shared/ui/modal/modal';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { StatCardData } from '../../shared/ui/stat-card/stat-card.model';
 import { Table } from '../../shared/ui/table/table';
-import { TableColumn } from '../../shared/ui/table/table.model';
+import { TableBadge, TableColumn } from '../../shared/ui/table/table.model';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 import { todayIso } from '../../shared/utils/date';
 import { DesembolsoFonpet } from '../acuerdos/models/acuerdo.model';
@@ -16,7 +16,7 @@ import { EntidadesService } from '../entidades/entidades.service';
 import { PagoRecibido } from '../pagos/models/pago.model';
 import { IMPUTACION_TABS, ImputacionTabId } from './imputaciones-tabs';
 import { ImputacionesService } from './imputaciones.service';
-import { Imputacion } from './models/imputacion.model';
+import { Imputacion, SaldoAFavor } from './models/imputacion.model';
 
 interface PagoPendienteRow extends PagoRecibido {
   readonly montoDisponible: number;
@@ -29,9 +29,22 @@ interface DesembolsoPendienteRow extends DesembolsoFonpet {
   readonly montoDisponibleLabel: string;
 }
 
+interface SaldoAFavorRow extends SaldoAFavor {
+  readonly montoDisponible: number;
+  readonly montoDisponibleLabel: string;
+}
+
+interface HistoricoRow extends Imputacion {
+  readonly estadoVisual: TableBadge;
+}
+
 type PartidaPendiente =
   | { readonly kind: 'pago'; readonly data: PagoPendienteRow }
-  | { readonly kind: 'desembolso'; readonly data: DesembolsoPendienteRow };
+  | { readonly kind: 'desembolso'; readonly data: DesembolsoPendienteRow }
+  | { readonly kind: 'saldo-a-favor'; readonly data: SaldoAFavorRow };
+
+const VIGENTE_BADGE: TableBadge = { label: 'Vigente', variant: 'success' };
+const REVERSADA_BADGE: TableBadge = { label: 'Reversada', variant: 'danger' };
 
 @Component({
   selector: 'app-imputaciones',
@@ -62,10 +75,14 @@ export class Imputaciones {
       (sum, d) => sum + this.imputacionesService.montoDisponibleDeDesembolso(d),
       0,
     );
+    const saldosPendientes = this.imputacionesService.saldosAFavorPendientes();
+    const totalSaldosPendientes = saldosPendientes.reduce(
+      (sum, s) => sum + this.imputacionesService.montoDisponibleDeSaldoAFavor(s),
+      0,
+    );
     const historico = this.imputacionesService.imputaciones();
-    const totalImputado = historico.reduce((sum, i) => sum + i.valorImputado, 0);
-    const totalIntereses = historico.reduce((sum, i) => sum + i.valorAplicadoIntereses, 0);
-    const totalCapital = historico.reduce((sum, i) => sum + i.valorAplicadoCapital, 0);
+    const totalIntereses = historico.filter((i) => !i.reversada).reduce((sum, i) => sum + i.valorAplicadoIntereses, 0);
+    const totalCapital = historico.filter((i) => !i.reversada).reduce((sum, i) => sum + i.valorAplicadoCapital, 0);
 
     return [
       {
@@ -77,6 +94,11 @@ export class Imputaciones {
         label: 'Desembolsos FONPET Pendientes',
         value: this.formatCurrency(totalDesembolsosPendientes),
         subtitle: `${desembolsosPendientes.length} desembolsos`,
+      },
+      {
+        label: 'Saldos a Favor Disponibles',
+        value: this.formatCurrency(totalSaldosPendientes),
+        subtitle: `${saldosPendientes.length} saldos · CCAL-022`,
       },
       { label: 'Aplicado a Intereses', value: this.formatCurrency(totalIntereses), subtitle: 'CCAL-014' },
       { label: 'Aplicado a Capital', value: this.formatCurrency(totalCapital), subtitle: `CCAL-015 · ${historico.length} imputaciones` },
@@ -122,33 +144,54 @@ export class Imputaciones {
     })),
   );
 
-  // --- Imputar modal (HU-016/017/022) ---
+  // --- Saldos a Favor Disponibles (gestión de excepciones de recaudo — CCAL-022) ---
+
+  protected readonly columnsSaldosAFavor: TableColumn<SaldoAFavorRow>[] = [
+    { key: 'id', header: 'ID Saldo' },
+    { key: 'entidad', header: 'Entidad' },
+    { key: 'origenImputacionId', header: 'Origen' },
+    { key: 'valorLabel', header: 'Valor Registrado', align: 'right' },
+    { key: 'montoDisponibleLabel', header: 'Disponible', align: 'right' },
+    { key: 'fecha', header: 'Fecha' },
+  ];
+
+  protected readonly saldosAFavorPendientes = computed<readonly SaldoAFavorRow[]>(() =>
+    this.imputacionesService.saldosAFavorPendientes().map((saldo) => ({
+      ...saldo,
+      montoDisponible: this.imputacionesService.montoDisponibleDeSaldoAFavor(saldo),
+      montoDisponibleLabel: this.formatCurrency(this.imputacionesService.montoDisponibleDeSaldoAFavor(saldo)),
+    })),
+  );
+
+  // --- Imputar modal (HU-016/017/022 + saldo a favor) ---
 
   protected readonly showImputarModal = signal(false);
   protected readonly imputarPartida = signal<PartidaPendiente | null>(null);
   protected formCuentaCobroId = '';
   protected formValorAImputar: number | null = null;
+  protected formRegistrarExcedente = true;
   protected formError = '';
 
-  protected readonly esDesembolso = computed(() => this.imputarPartida()?.kind === 'desembolso');
   protected readonly cuentaBloqueada = computed(() => {
     const partida = this.imputarPartida();
     return partida?.kind === 'pago' && !!partida.data.cuentaCobroId;
   });
 
+  protected readonly permiteObligacionMasAntigua = computed(() => this.imputarPartida()?.kind === 'pago');
+
   protected readonly cuentasDisponibles = computed(() => {
     const partida = this.imputarPartida();
     if (!partida) return [];
-    if (partida.kind === 'pago') {
-      return this.imputacionesService.cuentasPendientesDeEntidad(partida.data.entidadId);
-    }
-    return this.imputacionesService.cuentasElegiblesDeDesembolso(partida.data);
+    if (partida.kind === 'pago') return this.imputacionesService.cuentasPendientesDeEntidad(partida.data.entidadId);
+    if (partida.kind === 'desembolso') return this.imputacionesService.cuentasElegiblesDeDesembolso(partida.data);
+    return this.imputacionesService.cuentasElegiblesDeSaldoAFavor(partida.data);
   });
 
   protected abrirImputarPago(pago: PagoPendienteRow): void {
     this.imputarPartida.set({ kind: 'pago', data: pago });
     this.formCuentaCobroId = pago.cuentaCobroId ?? '';
     this.formValorAImputar = pago.montoDisponible;
+    this.formRegistrarExcedente = true;
     this.formError = '';
     this.showImputarModal.set(true);
   }
@@ -157,6 +200,16 @@ export class Imputaciones {
     this.imputarPartida.set({ kind: 'desembolso', data: desembolso });
     this.formCuentaCobroId = '';
     this.formValorAImputar = desembolso.montoDisponible;
+    this.formRegistrarExcedente = true;
+    this.formError = '';
+    this.showImputarModal.set(true);
+  }
+
+  protected abrirImputarSaldoAFavor(saldo: SaldoAFavorRow): void {
+    this.imputarPartida.set({ kind: 'saldo-a-favor', data: saldo });
+    this.formCuentaCobroId = '';
+    this.formValorAImputar = saldo.montoDisponible;
+    this.formRegistrarExcedente = false;
     this.formError = '';
     this.showImputarModal.set(true);
   }
@@ -176,7 +229,9 @@ export class Imputaciones {
   protected get partidaId(): string {
     const partida = this.imputarPartida();
     if (!partida) return '';
-    return partida.kind === 'pago' ? partida.data.idTransaccion : partida.data.idDesembolso;
+    if (partida.kind === 'pago') return partida.data.idTransaccion;
+    if (partida.kind === 'desembolso') return partida.data.idDesembolso;
+    return partida.data.id;
   }
 
   protected get partidaEntidad(): string {
@@ -189,6 +244,13 @@ export class Imputaciones {
 
   protected get partidaMontoDisponible(): number {
     return this.imputarPartida()?.data.montoDisponible ?? 0;
+  }
+
+  protected get partidaAyudaCuenta(): string {
+    const kind = this.imputarPartida()?.kind;
+    if (kind === 'desembolso') return 'Solo se listan las obligaciones cubiertas por el acuerdo FONPET.';
+    if (kind === 'saldo-a-favor') return 'Solo se listan obligaciones pendientes de la misma entidad que originó el saldo a favor.';
+    return 'CCAL-019 — si no se indica, se aplica a la obligación más antigua.';
   }
 
   /** Getter (no `computed`) porque formCuentaCobroId/formValorAImputar son campos planos de ngModel, no signals. */
@@ -216,12 +278,20 @@ export class Imputaciones {
               pagoId: partida.data.idTransaccion,
               cuentaCobroId: this.formCuentaCobroId,
               valorAImputar: this.formValorAImputar,
+              registrarExcedenteComoSaldoAFavor: this.formRegistrarExcedente,
             })
-          : this.imputacionesService.imputarDesembolso({
-              desembolsoId: partida.data.idDesembolso,
-              cuentaCobroId: this.formCuentaCobroId,
-              valorAImputar: this.formValorAImputar,
-            });
+          : partida.kind === 'desembolso'
+            ? this.imputacionesService.imputarDesembolso({
+                desembolsoId: partida.data.idDesembolso,
+                cuentaCobroId: this.formCuentaCobroId,
+                valorAImputar: this.formValorAImputar,
+                registrarExcedenteComoSaldoAFavor: this.formRegistrarExcedente,
+              })
+            : this.imputacionesService.aplicarSaldoAFavor({
+                saldoAFavorId: partida.data.id,
+                cuentaCobroId: this.formCuentaCobroId,
+                valorAImputar: this.formValorAImputar,
+              });
       this.toastService.show(`Imputación ${nueva.idImputacion} registrada correctamente.`);
       this.showImputarModal.set(false);
     } catch (error) {
@@ -231,7 +301,7 @@ export class Imputaciones {
 
   // --- Histórico de Imputaciones (HU-018) ---
 
-  protected readonly columnsHistorico: TableColumn<Imputacion>[] = [
+  protected readonly columnsHistorico: TableColumn<HistoricoRow>[] = [
     { key: 'idImputacion', header: 'ID Imputación' },
     { key: 'origen', header: 'Origen' },
     { key: 'cuentaCobroId', header: 'Cuenta de Cobro' },
@@ -241,6 +311,7 @@ export class Imputaciones {
     { key: 'valorAplicadoCapitalLabel', header: 'A Capital', align: 'right' },
     { key: 'saldoTotalObligacionLabel', header: 'Saldo Resultante', align: 'right' },
     { key: 'fecha', header: 'Fecha' },
+    { key: 'estadoVisual', header: 'Estado' },
   ];
 
   protected searchTerm = '';
@@ -253,24 +324,27 @@ export class Imputaciones {
   private readonly appliedDesde = signal('');
   private readonly appliedHasta = signal('');
 
-  protected readonly filteredHistorico = computed(() => {
+  protected readonly filteredHistorico = computed<readonly HistoricoRow[]>(() => {
     const term = this.appliedSearchTerm().trim().toLowerCase();
     const entidadId = this.appliedEntidadId();
     const desde = this.appliedDesde();
     const hasta = this.appliedHasta();
 
-    return this.imputacionesService.imputaciones().filter((imputacion) => {
-      if (entidadId && imputacion.entidadId !== entidadId) return false;
-      if (desde && imputacion.fecha < desde) return false;
-      if (hasta && imputacion.fecha > hasta) return false;
-      if (term) {
-        const referencia = imputacion.pagoId ?? imputacion.desembolsoId ?? '';
-        const haystack =
-          `${imputacion.idImputacion} ${referencia} ${imputacion.cuentaCobroId} ${imputacion.entidad} ${imputacion.pensionados.join(' ')}`.toLowerCase();
-        if (!haystack.includes(term)) return false;
-      }
-      return true;
-    });
+    return this.imputacionesService
+      .imputaciones()
+      .filter((imputacion) => {
+        if (entidadId && imputacion.entidadId !== entidadId) return false;
+        if (desde && imputacion.fecha < desde) return false;
+        if (hasta && imputacion.fecha > hasta) return false;
+        if (term) {
+          const referencia = imputacion.pagoId ?? imputacion.desembolsoId ?? imputacion.saldoAFavorId ?? '';
+          const haystack =
+            `${imputacion.idImputacion} ${referencia} ${imputacion.cuentaCobroId} ${imputacion.entidad} ${imputacion.pensionados.join(' ')}`.toLowerCase();
+          if (!haystack.includes(term)) return false;
+        }
+        return true;
+      })
+      .map((imputacion) => ({ ...imputacion, estadoVisual: imputacion.reversada ? REVERSADA_BADGE : VIGENTE_BADGE }));
   });
 
   protected buscarHistorico(): void {
@@ -296,11 +370,12 @@ export class Imputaciones {
       'Regla',
       'Fecha',
       'Registrado Por',
+      'Estado',
     ];
     const filas = imputaciones.map((i) => [
       i.idImputacion,
       i.origen,
-      i.pagoId ?? i.desembolsoId ?? '',
+      i.pagoId ?? i.desembolsoId ?? i.saldoAFavorId ?? '',
       i.cuentaCobroId,
       i.entidad,
       i.pensionados.join('; '),
@@ -311,6 +386,7 @@ export class Imputaciones {
       i.reglaAplicada,
       i.fecha,
       i.registradoPor,
+      i.estadoVisual.label,
     ]);
     const csv = [encabezado, ...filas]
       .map((fila) => fila.map((valor) => `"${valor.replace(/"/g, '""')}"`).join(','))
@@ -330,11 +406,46 @@ export class Imputaciones {
   // --- Ver Detalle histórico ---
 
   protected readonly showDetalleModal = signal(false);
-  protected readonly detalleImputacion = signal<Imputacion | null>(null);
+  protected readonly detalleImputacion = signal<HistoricoRow | null>(null);
 
-  protected verDetalle(imputacion: Imputacion): void {
+  protected verDetalle(imputacion: HistoricoRow): void {
     this.detalleImputacion.set(imputacion);
     this.showDetalleModal.set(true);
+  }
+
+  // --- Reversar (gestión de excepciones de recaudo) ---
+
+  protected readonly showReversarModal = signal(false);
+  protected readonly reversarObjetivo = signal<HistoricoRow | null>(null);
+  protected reversarMotivo = '';
+  protected reversarError = '';
+
+  protected puedeReversar(imputacion: Imputacion): boolean {
+    return this.imputacionesService.puedeReversar(imputacion).ok;
+  }
+
+  protected abrirReversar(imputacion: HistoricoRow): void {
+    const validacion = this.imputacionesService.puedeReversar(imputacion);
+    if (!validacion.ok) {
+      this.toastService.show(validacion.motivo ?? 'No es posible reversar esta imputación.');
+      return;
+    }
+    this.reversarObjetivo.set(imputacion);
+    this.reversarMotivo = '';
+    this.reversarError = '';
+    this.showReversarModal.set(true);
+  }
+
+  protected submitReversar(): void {
+    const imputacion = this.reversarObjetivo();
+    if (!imputacion) return;
+    try {
+      this.imputacionesService.reversar(imputacion.idImputacion, this.reversarMotivo);
+      this.toastService.show(`Imputación ${imputacion.idImputacion} reversada correctamente.`);
+      this.showReversarModal.set(false);
+    } catch (error) {
+      this.reversarError = error instanceof Error ? error.message : 'No fue posible reversar la imputación.';
+    }
   }
 
   private formatCurrency(value: number): string {
