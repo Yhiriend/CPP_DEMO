@@ -1,0 +1,62 @@
+[
+  {
+    "id": "CJ-2026-001",
+    "cuentaCobroId": "CC-2026-001",
+    "entidadId": "alcaldia-municipal-de-muestra",
+    "entidad": "Alcaldía Municipal de Muestra",
+    "valor": 52400000,
+    "valorLabel": "$52,400,000",
+    "fechaVencimientoCuenta": "2026-03-07",
+    "fechaRadicacion": "2026-04-10",
+    "estado": { "label": "Proceso de Cobro Coactivo", "variant": "danger" },
+    "historial": [
+      {
+        "id": "ACT-2026-001",
+        "fecha": "2026-04-10",
+        "tipo": "Radicación",
+        "descripcion": "Caso radicado por mora superior a 30 días en la Cuenta de Cobro CC-2026-001.",
+        "responsable": "admin@sgdp.gov.co"
+      },
+      {
+        "id": "ACT-2026-002",
+        "fecha": "2026-04-15",
+        "tipo": "Requerimiento de Pago",
+        "descripcion": "Oficio de requerimiento OJ-2026-014 remitido a la Alcaldía Municipal de Muestra, con término de 15 días hábiles para responder u objetar.",
+        "responsable": "admin@sgdp.gov.co"
+      },
+      {
+        "id": "ACT-2026-003",
+        "fecha": "2026-04-28",
+        "tipo": "Objeción Recibida",
+        "descripcion": "La entidad radicó objeción disputando el porcentaje de concurrencia aplicado.",
+        "responsable": "admin@sgdp.gov.co"
+      },
+      {
+        "id": "ACT-2026-004",
+        "fecha": "2026-05-20",
+        "tipo": "Objeción Resuelta",
+        "descripcion": "Objeción rechazada: el porcentaje de concurrencia coincide con el certificado de tiempos laborados en el expediente.",
+        "responsable": "admin@sgdp.gov.co"
+      },
+      {
+        "id": "ACT-2026-005",
+        "fecha": "2026-05-22",
+        "tipo": "Cobro Coactivo",
+        "descripcion": "Se inicia proceso de cobro coactivo al no prosperar la objeción.",
+        "responsable": "admin@sgdp.gov.co"
+      }
+    ],
+    "objeciones": [
+      {
+        "id": "OBJ-2026-001",
+        "fecha": "2026-04-28",
+        "motivo": "Se disputa el porcentaje de concurrencia aplicado en la liquidación LQ-2026-002.",
+        "radicadaPor": "Oficina Jurídica - Alcaldía Municipal de Muestra",
+        "estado": "Rechazada",
+        "fechaResolucion": "2026-05-20",
+        "resolucionMotivo": "El porcentaje de concurrencia coincide con el certificado de tiempos laborados en el expediente."
+      }
+    ],
+    "responsable": "admin@sgdp.gov.co"
+  }
+]

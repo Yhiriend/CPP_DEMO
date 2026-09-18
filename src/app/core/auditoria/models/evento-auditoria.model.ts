@@ -8,6 +8,7 @@ export type ModuloAuditoria =
   | 'Imputaciones'
   | 'Acuerdos FONPET'
   | 'Conciliación'
+  | 'Gestión Jurídica'
   | 'Parametrización';
 
 export const MODULOS_AUDITORIA: readonly ModuloAuditoria[] = [
@@ -20,6 +21,7 @@ export const MODULOS_AUDITORIA: readonly ModuloAuditoria[] = [
   'Imputaciones',
   'Acuerdos FONPET',
   'Conciliación',
+  'Gestión Jurídica',
   'Parametrización',
 ];
 

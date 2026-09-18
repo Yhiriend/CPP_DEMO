@@ -80,5 +80,29 @@
     "historialRecepcion": [],
     "estado": { "label": "Anulada", "variant": "neutral" },
     "creadoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "idCuenta": "CC-2026-005",
+    "tipo": "Individual",
+    "entidadId": "municipio-piloto-del-sur",
+    "entidad": "Municipio Piloto del Sur",
+    "liquidacionIds": ["LQ-2026-006"],
+    "pensionadoIds": ["jose-ramirez-castillo"],
+    "pensionados": ["José Ramírez Castillo"],
+    "capital": 24700000,
+    "capitalLabel": "$24,700,000",
+    "fechaGeneracion": "2026-01-05",
+    "fechaRecepcion": "2026-01-10",
+    "fechaVencimiento": "2026-02-09",
+    "historialRecepcion": [
+      {
+        "fechaRecepcion": "2026-01-10",
+        "soporte": { "nombreArchivo": "radicado-CC-2026-005.xlsx", "fechaCargue": "2026-01-10" },
+        "registradoPor": "admin@sgdp.gov.co",
+        "timestamp": "2026-01-10 09:05"
+      }
+    ],
+    "estado": { "label": "Radicada", "variant": "success" },
+    "creadoPor": "admin@sgdp.gov.co"
   }
 ]

@@ -19,5 +19,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Reportes', path: '/reportes', icon: 'bar-chart-3', implemented: true },
   { label: 'Alertas', path: '/alertas', icon: 'bell', implemented: true },
   { label: 'Conciliación', path: '/conciliacion', icon: 'git-compare', implemented: true },
+  { label: 'Gestión Jurídica', path: '/juridica', icon: 'gavel', implemented: true },
   { label: 'Sincronización', path: '/sincronizacion', icon: 'refresh-cw' },
 ];

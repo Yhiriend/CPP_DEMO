@@ -1,0 +1,508 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Gestión Jurídica']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Gestión Jurídica de Cobro</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Casos de cobro sobre Cuentas de Cobro vencidas: requerimiento de pago, objeciones de la entidad deudora,
+      cobro coactivo y las actuaciones registradas en cada uno.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-stat-card [stat]="kpi" />
+    }
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEstado"
+    >
+      <option value="">Cualquier estado</option>
+      @for (estado of estadosFiltro; track estado) {
+        <option [value]="estado">{{ estado }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredCasos().length }} registros</span>
+  </div>
+
+  <app-table title="Casos Jurídicos" [columns]="columns" [rows]="filteredCasos()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="exportar()"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="openRadicarModal()"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Radicar Caso
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verCaso(row)"
+      >
+        Ver Caso
+      </button>
+    </ng-template>
+  </app-table>
+</div>
+
+@if (showRadicarModal()) {
+  <app-modal title="Radicar Caso Jurídico" (close)="showRadicarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <p class="text-slate-600">
+        Solo se listan Cuentas de Cobro Vencidas, no cubiertas por Imputaciones y sin un caso jurídico activo.
+      </p>
+      <div>
+        <label for="cjCuenta" class="mb-1.5 block text-sm font-medium text-slate-700">Cuenta de Cobro Vencida*</label>
+        <select
+          id="cjCuenta"
+          name="cjCuenta"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formCuentaId"
+        >
+          <option value="" disabled>Seleccione...</option>
+          @for (cuenta of cuentasElegibles(); track cuenta.idCuenta) {
+            <option [value]="cuenta.idCuenta">{{ cuenta.idCuenta }} — {{ cuenta.entidad }} ({{ cuenta.capitalLabel }})</option>
+          }
+        </select>
+        @if (cuentasElegibles().length === 0) {
+          <p class="mt-1.5 text-xs text-slate-400">No hay cuentas elegibles en este momento.</p>
+        }
+      </div>
+      @if (radicarError) {
+        <p class="text-sm font-medium text-red-600">{{ radicarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showRadicarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitRadicar()"
+      >
+        Radicar Caso
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showCasoModal() && casoActivo(); as caso) {
+  <app-modal [title]="'Caso ' + caso.id" (close)="showCasoModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad</p>
+          <p class="font-medium text-slate-900">{{ caso.entidad }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Cuenta de Cobro</p>
+          <p class="font-medium text-slate-900">{{ caso.cuentaCobroId }} · {{ caso.valorLabel }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Venció el</p>
+          <p class="font-medium text-slate-900">{{ caso.fechaVencimientoCuenta }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Estado Actual</p>
+          <p class="font-medium text-slate-900">{{ caso.estado.label }}</p>
+        </div>
+      </div>
+
+      @if (estaCubierta(caso) && !esTerminal(caso)) {
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+          La Cuenta de Cobro {{ caso.cuentaCobroId }} ya está completamente pagada según Imputaciones. Puede cerrar
+          este caso.
+        </div>
+      }
+
+      @if (objecionPendiente(caso); as pendiente) {
+        <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
+          <p class="font-semibold text-amber-800">Objeción {{ pendiente.id }} pendiente de resolución</p>
+          <p class="mt-1 text-amber-700">{{ pendiente.motivo }}</p>
+          <p class="mt-1 text-amber-600">Radicada por {{ pendiente.radicadaPor }} el {{ pendiente.fecha }}.</p>
+        </div>
+      }
+
+      <div>
+        <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Flujo Lineal</p>
+        <div class="flex flex-wrap items-center gap-1.5">
+          @for (paso of flujo; track paso; let i = $index) {
+            <span
+              class="rounded-full px-2.5 py-1 text-xs font-medium"
+              [class]="paso === caso.estado.label ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'"
+            >
+              {{ i + 1 }}. {{ paso }}
+            </span>
+            @if (i < flujo.length - 1) {
+              <span class="text-slate-300">→</span>
+            }
+          }
+        </div>
+        @if (esTerminal(caso)) {
+          <p class="mt-2 text-xs font-medium text-slate-500">Este caso está cerrado y no continúa el flujo.</p>
+        }
+      </div>
+
+      @if (caso.objeciones.length > 0) {
+        <div>
+          <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">Objeciones</p>
+          <div class="space-y-2">
+            @for (objecion of caso.objeciones; track objecion.id) {
+              <div class="rounded-lg border border-slate-200 p-3 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slate-700">{{ objecion.id }} · {{ objecion.estado }}</span>
+                  <span class="text-slate-400">{{ objecion.fecha }}</span>
+                </div>
+                <p class="mt-0.5 text-slate-500">{{ objecion.motivo }}</p>
+                @if (objecion.resolucionMotivo) {
+                  <p class="mt-1 text-slate-500"><b>Resolución</b> ({{ objecion.fechaResolucion }}): {{ objecion.resolucionMotivo }}</p>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div>
+        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">Histórico de Actuaciones</p>
+        <div class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-slate-200 p-3">
+          @for (actuacion of caso.historial; track actuacion.id) {
+            <div class="text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-700">{{ actuacion.tipo }}</span>
+                <span class="text-slate-400">{{ actuacion.fecha }}</span>
+              </div>
+              <p class="mt-0.5 text-slate-500">{{ actuacion.descripcion }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div modal-footer class="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showCasoModal.set(false)"
+      >
+        Cerrar
+      </button>
+
+      @if (!esTerminal(caso)) {
+        <button
+          type="button"
+          class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          (click)="openActuacionModal()"
+        >
+          Registrar Actuación
+        </button>
+
+        @if (caso.estado.label === 'Requerimiento Enviado') {
+          <button
+            type="button"
+            class="rounded-lg border border-amber-200 px-4 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
+            (click)="openObjecionModal()"
+          >
+            Registrar Objeción
+          </button>
+        }
+
+        @if (objecionPendiente(caso)) {
+          <button
+            type="button"
+            class="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            (click)="openResolverModal(false)"
+          >
+            Rechazar Objeción
+          </button>
+          <button
+            type="button"
+            class="rounded-lg border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+            (click)="openResolverModal(true)"
+          >
+            Aceptar Objeción
+          </button>
+        }
+
+        @if (estaCubierta(caso)) {
+          <button
+            type="button"
+            class="rounded-lg border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+            (click)="cerrarPagado()"
+          >
+            Cerrar como Pagado
+          </button>
+        }
+
+        <button
+          type="button"
+          class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          (click)="openArchivarModal()"
+        >
+          Archivar
+        </button>
+
+        @if (siguienteEstado(caso); as siguiente) {
+          <button
+            type="button"
+            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            (click)="openAvanzarModal()"
+          >
+            Avanzar a "{{ siguiente }}"
+          </button>
+        }
+      }
+    </div>
+  </app-modal>
+}
+
+@if (showAvanzarModal() && casoActivo(); as caso) {
+  <app-modal [title]="'Avanzar ' + caso.id" (close)="showAvanzarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      @if (siguienteEstado(caso); as siguiente) {
+        <p class="text-slate-600">Va a avanzar este caso a <b>"{{ siguiente }}"</b>.</p>
+      }
+      <div>
+        <label for="avanzarDesc" class="mb-1.5 block text-sm font-medium text-slate-700">Descripción de la actuación*</label>
+        <textarea
+          id="avanzarDesc"
+          name="avanzarDesc"
+          rows="3"
+          placeholder="Ej. Oficio de requerimiento OJ-2026-020 remitido a la entidad."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="avanzarDescripcion"
+        ></textarea>
+      </div>
+      @if (avanzarError) {
+        <p class="text-sm font-medium text-red-600">{{ avanzarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showAvanzarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitAvanzar()"
+      >
+        Confirmar
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showObjecionModal() && casoActivo(); as caso) {
+  <app-modal [title]="'Registrar Objeción — ' + caso.id" (close)="showObjecionModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div>
+        <label for="objRadicadaPor" class="mb-1.5 block text-sm font-medium text-slate-700">Radicada por*</label>
+        <input
+          id="objRadicadaPor"
+          name="objRadicadaPor"
+          type="text"
+          placeholder="Ej. Oficina Jurídica de la entidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="objecionRadicadaPor"
+        />
+      </div>
+      <div>
+        <label for="objMotivo" class="mb-1.5 block text-sm font-medium text-slate-700">Motivo*</label>
+        <textarea
+          id="objMotivo"
+          name="objMotivo"
+          rows="3"
+          placeholder="Ej. Se disputa el porcentaje de concurrencia aplicado."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="objecionMotivo"
+        ></textarea>
+      </div>
+      @if (objecionError) {
+        <p class="text-sm font-medium text-red-600">{{ objecionError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showObjecionModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitObjecion()"
+      >
+        Registrar Objeción
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showResolverModal() && casoActivo(); as caso) {
+  <app-modal [title]="(resolverAceptar ? 'Aceptar' : 'Rechazar') + ' Objeción — ' + caso.id" (close)="showResolverModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <p class="text-slate-600">
+        @if (resolverAceptar) {
+          Aceptar la objeción cierra el caso como <b>"Objeción Aceptada"</b>: el cobro queda invalidado.
+        } @else {
+          Rechazar la objeción retoma el proceso en <b>"Proceso de Cobro Coactivo"</b>.
+        }
+      </p>
+      <div>
+        <label for="resolverMotivo" class="mb-1.5 block text-sm font-medium text-slate-700">Motivo de la resolución*</label>
+        <textarea
+          id="resolverMotivo"
+          name="resolverMotivo"
+          rows="3"
+          placeholder="Ej. El porcentaje de concurrencia coincide con el certificado de tiempos laborados."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="resolverMotivo"
+        ></textarea>
+      </div>
+      @if (resolverError) {
+        <p class="text-sm font-medium text-red-600">{{ resolverError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showResolverModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        [class]="resolverAceptar ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'"
+        (click)="submitResolver()"
+      >
+        Confirmar
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showActuacionModal() && casoActivo(); as caso) {
+  <app-modal [title]="'Registrar Actuación — ' + caso.id" (close)="showActuacionModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div>
+        <label for="actDesc" class="mb-1.5 block text-sm font-medium text-slate-700">Descripción*</label>
+        <textarea
+          id="actDesc"
+          name="actDesc"
+          rows="3"
+          placeholder="Ej. Visita a las instalaciones de la entidad."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="actuacionDescripcion"
+        ></textarea>
+      </div>
+      @if (actuacionError) {
+        <p class="text-sm font-medium text-red-600">{{ actuacionError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showActuacionModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitActuacion()"
+      >
+        Registrar Actuación
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showArchivarModal() && casoActivo(); as caso) {
+  <app-modal [title]="'Archivar ' + caso.id" (close)="showArchivarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <p class="text-slate-600">Archivar es un estado terminal: el caso no continúa el flujo (prescripción, desistimiento, etc.).</p>
+      <div>
+        <label for="archMotivo" class="mb-1.5 block text-sm font-medium text-slate-700">Motivo*</label>
+        <textarea
+          id="archMotivo"
+          name="archMotivo"
+          rows="3"
+          placeholder="Ej. La entidad fue liquidada y sus obligaciones fueron asumidas por otra entidad."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="archivarMotivo"
+        ></textarea>
+      </div>
+      @if (archivarError) {
+        <p class="text-sm font-medium text-red-600">{{ archivarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showArchivarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+        (click)="submitArchivar()"
+      >
+        Archivar Caso
+      </button>
+    </div>
+  </app-modal>
+}

@@ -79,6 +79,10 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/conciliacion/conciliacion.routes').then((m) => m.CONCILIACION_ROUTES),
       },
+      {
+        path: 'juridica',
+        loadChildren: () => import('./features/juridica/juridica.routes').then((m) => m.JURIDICA_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
