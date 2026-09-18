@@ -3,6 +3,7 @@ export type ModuloAuditoria =
   | 'Pensionados'
   | 'Liquidaciones'
   | 'Cuentas de Cobro'
+  | 'Cuentas por Pagar'
   | 'Pagos'
   | 'Imputaciones'
   | 'Acuerdos FONPET'
@@ -13,6 +14,7 @@ export const MODULOS_AUDITORIA: readonly ModuloAuditoria[] = [
   'Pensionados',
   'Liquidaciones',
   'Cuentas de Cobro',
+  'Cuentas por Pagar',
   'Pagos',
   'Imputaciones',
   'Acuerdos FONPET',

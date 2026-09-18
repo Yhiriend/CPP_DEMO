@@ -1,0 +1,45 @@
+[
+  {
+    "id": "OPP-2026-001",
+    "entidadAcreedoraId": "gobernacion-de-ejemplo",
+    "entidadAcreedora": "Gobernación de Ejemplo",
+    "pensionado": "Luis Fernando Ospina R.",
+    "numeroDocumentoPensionado": "70.123.456",
+    "periodo": "Ago 2026",
+    "porcentajeConcurrencia": 30,
+    "valorMesadaPensional": 80000000,
+    "valor": 24000000,
+    "valorLabel": "$24,000,000",
+    "soporte": { "nombreArchivo": "soporte-OPP-2026-001.xlsx", "fechaCargue": "2026-08-01" },
+    "estado": { "label": "Causada", "variant": "info" },
+    "historialEstados": [
+      { "estado": "Causada", "area": "Contabilidad", "fecha": "2026-08-20", "usuario": "admin@sgdp.gov.co", "observacion": "Registrada en SEVEN para el corte de agosto." },
+      { "estado": "Aprobada Financiera", "area": "Subdirección Financiera", "fecha": "2026-08-12", "usuario": "admin@sgdp.gov.co", "observacion": "Disponibilidad presupuestal verificada." },
+      { "estado": "Validada", "area": "Gestión Pensional", "fecha": "2026-08-05", "usuario": "admin@sgdp.gov.co", "observacion": "Concurrencia y soportes verificados." },
+      { "estado": "Registrada", "area": "Gestión Pensional", "fecha": "2026-08-01", "usuario": "admin@sgdp.gov.co", "observacion": null }
+    ],
+    "fechaRegistro": "2026-08-01",
+    "fechaPago": null,
+    "registradoPor": "admin@sgdp.gov.co"
+  },
+  {
+    "id": "OPP-2026-002",
+    "entidadAcreedoraId": "alcaldia-municipal-de-muestra",
+    "entidadAcreedora": "Alcaldía Municipal de Muestra",
+    "pensionado": "Marta Isabel Ruiz C.",
+    "numeroDocumentoPensionado": "41.987.654",
+    "periodo": "Sep 2026",
+    "porcentajeConcurrencia": 20,
+    "valorMesadaPensional": 60000000,
+    "valor": 12000000,
+    "valorLabel": "$12,000,000",
+    "soporte": { "nombreArchivo": "soporte-OPP-2026-002.xlsx", "fechaCargue": "2026-09-10" },
+    "estado": { "label": "Registrada", "variant": "neutral" },
+    "historialEstados": [
+      { "estado": "Registrada", "area": "Gestión Pensional", "fecha": "2026-09-10", "usuario": "admin@sgdp.gov.co", "observacion": null }
+    ],
+    "fechaRegistro": "2026-09-10",
+    "fechaPago": null,
+    "registradoPor": "admin@sgdp.gov.co"
+  }
+]

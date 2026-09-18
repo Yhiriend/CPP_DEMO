@@ -58,6 +58,11 @@ export const routes: Routes = [
           import('./features/cuentas-de-cobro/cuentas-de-cobro.routes').then((m) => m.CUENTAS_DE_COBRO_ROUTES),
       },
       {
+        path: 'cuentas-por-pagar',
+        loadChildren: () =>
+          import('./features/cuentas-por-pagar/cuentas-por-pagar.routes').then((m) => m.CUENTAS_POR_PAGAR_ROUTES),
+      },
+      {
         path: 'intereses',
         loadChildren: () => import('./features/intereses/intereses.routes').then((m) => m.INTERESES_ROUTES),
       },

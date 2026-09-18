@@ -1,0 +1,400 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Cuentas por Pagar']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Cuentas por Pagar</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Obligaciones que SCPP le debe a una entidad acreedora — el flujo inverso de Cuentas de Cobro, con
+      aprobación secuencial entre Gestión Pensional, Subdirección Financiera, Contabilidad y Tesorería.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <input
+      type="search"
+      name="oppSearch"
+      placeholder="ID, entidad o pensionado"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="buscar()"
+    />
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEstado"
+    >
+      <option value="">Cualquier estado</option>
+      @for (estado of estadosFiltro; track estado) {
+        <option [value]="estado">{{ estado }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredObligaciones().length }} registros</span>
+  </div>
+
+  <app-table title="Obligaciones por Pagar" [columns]="columns" [rows]="filteredObligaciones()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="exportar()"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="openFormModal()"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Registrar Obligación
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verSeguimiento(row)"
+      >
+        Ver Seguimiento
+      </button>
+    </ng-template>
+  </app-table>
+</div>
+
+@if (showFormModal()) {
+  <app-modal title="Registrar Obligación por Pagar" (close)="showFormModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div>
+        <label for="oppEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Entidad Acreedora*</label>
+        <select
+          id="oppEntidad"
+          name="oppEntidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formEntidadId"
+        >
+          <option value="" disabled>Seleccione...</option>
+          @for (entidad of entidades(); track entidad.id) {
+            <option [value]="entidad.id">{{ entidad.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="oppPensionado" class="mb-1.5 block text-sm font-medium text-slate-700">Pensionado*</label>
+          <input
+            id="oppPensionado"
+            name="oppPensionado"
+            type="text"
+            placeholder="Nombres y apellidos"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formPensionado"
+          />
+        </div>
+        <div>
+          <label for="oppDocumento" class="mb-1.5 block text-sm font-medium text-slate-700">Documento*</label>
+          <input
+            id="oppDocumento"
+            name="oppDocumento"
+            type="text"
+            placeholder="C.C. 12.345.678"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formDocumento"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="oppPeriodo" class="mb-1.5 block text-sm font-medium text-slate-700">Periodo*</label>
+        <input
+          id="oppPeriodo"
+          name="oppPeriodo"
+          type="text"
+          placeholder="Ej. Sep 2026"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formPeriodo"
+        />
+      </div>
+
+      <div>
+        <label for="oppMesada" class="mb-1.5 block text-sm font-medium text-slate-700">Valor Mesada Pensional*</label>
+        <input
+          id="oppMesada"
+          name="oppMesada"
+          type="number"
+          min="0"
+          placeholder="0"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formValorMesadaPensional"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="oppDiasEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Días Entidad*</label>
+          <input
+            id="oppDiasEntidad"
+            name="oppDiasEntidad"
+            type="number"
+            min="0"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formDiasEntidad"
+          />
+        </div>
+        <div>
+          <label for="oppTotalDias" class="mb-1.5 block text-sm font-medium text-slate-700">Total Días Pensión*</label>
+          <input
+            id="oppTotalDias"
+            name="oppTotalDias"
+            type="number"
+            min="0"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formTotalDiasPension"
+          />
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-slate-50 px-4 py-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">% Concurrencia (CCAL-001)</span>
+          <span class="font-semibold text-slate-900">{{ previewPorcentaje.toFixed(2) }}%</span>
+        </div>
+        <div class="mt-1 flex items-center justify-between">
+          <span class="text-slate-500">Valor Cuota Parte a Pagar (CCAL-002)</span>
+          <span class="font-semibold text-slate-900">{{ previewValorLabel }}</span>
+        </div>
+      </div>
+
+      <div>
+        <label for="oppSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="oppSoporte"
+          name="oppSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onSoporteSelected($event)"
+        />
+        @if (formSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ formSoporteNombre }}</p>
+        }
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        Registrar Obligación
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showSeguimientoModal() && seguimientoObligacion(); as obligacion) {
+  <app-modal [title]="'Obligación ' + obligacion.id" (close)="showSeguimientoModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad Acreedora</p>
+          <p class="font-medium text-slate-900">{{ obligacion.entidadAcreedora }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Pensionado</p>
+          <p class="font-medium text-slate-900">{{ obligacion.pensionado }} · {{ obligacion.numeroDocumentoPensionado }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Valor (CCAL-002)</p>
+          <p class="font-medium text-slate-900">{{ obligacion.valorLabel }} ({{ obligacion.porcentajeConcurrencia }}%)</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Estado Actual</p>
+          <p class="font-medium text-slate-900">{{ obligacion.estado.label }}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Flujo de Aprobación</p>
+        <div class="flex flex-wrap items-center gap-1.5">
+          @for (paso of flujo; track paso; let i = $index) {
+            <span
+              class="rounded-full px-2.5 py-1 text-xs font-medium"
+              [class]="
+                paso === obligacion.estado.label
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-slate-100 text-slate-500'
+              "
+            >
+              {{ i + 1 }}. {{ paso }}
+            </span>
+            @if (i < flujo.length - 1) {
+              <span class="text-slate-300">→</span>
+            }
+          }
+        </div>
+        @if (obligacion.estado.label === 'Rechazada') {
+          <p class="mt-2 text-xs font-medium text-red-600">Esta obligación fue rechazada y no continúa el flujo.</p>
+        }
+      </div>
+
+      <div>
+        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-400">Histórico</p>
+        <div class="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-slate-200 p-3">
+          @for (registro of obligacion.historialEstados; track registro.fecha + registro.estado) {
+            <div class="text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-700">{{ registro.estado }} · {{ registro.area }}</span>
+                <span class="text-slate-400">{{ registro.fecha }}</span>
+              </div>
+              @if (registro.observacion) {
+                <p class="mt-0.5 text-slate-500">{{ registro.observacion }}</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showSeguimientoModal.set(false)"
+      >
+        Cerrar
+      </button>
+      @if (puedeRechazar(obligacion)) {
+        <button
+          type="button"
+          class="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+          (click)="openRechazarModal()"
+        >
+          Rechazar
+        </button>
+      }
+      @if (siguienteEstado(obligacion); as siguiente) {
+        <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="openAvanzarModal()"
+        >
+          Avanzar a "{{ siguiente }}"
+        </button>
+      }
+    </div>
+  </app-modal>
+}
+
+@if (showAvanzarModal() && seguimientoObligacion(); as obligacion) {
+  <app-modal [title]="'Avanzar ' + obligacion.id" (close)="showAvanzarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      @if (siguienteEstado(obligacion); as siguiente) {
+        <p class="text-slate-600">
+          Va a avanzar esta obligación a <b>"{{ siguiente }}"</b>, a cargo de Contabilidad/Tesorería/Subdirección
+          Financiera según corresponda.
+        </p>
+      }
+      <div>
+        <label for="avanzarObs" class="mb-1.5 block text-sm font-medium text-slate-700">Observación (opcional)</label>
+        <textarea
+          id="avanzarObs"
+          name="avanzarObs"
+          rows="3"
+          placeholder="Ej. Disponibilidad presupuestal verificada."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="avanzarObservacion"
+        ></textarea>
+      </div>
+      @if (avanzarError) {
+        <p class="text-sm font-medium text-red-600">{{ avanzarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showAvanzarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitAvanzar()"
+      >
+        Confirmar
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showRechazarModal() && seguimientoObligacion(); as obligacion) {
+  <app-modal [title]="'Rechazar ' + obligacion.id" (close)="showRechazarModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <p class="text-slate-600">El rechazo es un estado terminal: la obligación no continúa el flujo de pago.</p>
+      <div>
+        <label for="rechazarMotivo" class="mb-1.5 block text-sm font-medium text-slate-700">Motivo*</label>
+        <textarea
+          id="rechazarMotivo"
+          name="rechazarMotivo"
+          rows="3"
+          placeholder="Ej. Los soportes no corresponden al periodo solicitado."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="rechazarMotivo"
+        ></textarea>
+      </div>
+      @if (rechazarError) {
+        <p class="text-sm font-medium text-red-600">{{ rechazarError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showRechazarModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+        (click)="submitRechazar()"
+      >
+        Rechazar Obligación
+      </button>
+    </div>
+  </app-modal>
+}

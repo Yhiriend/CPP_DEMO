@@ -1,5 +1,6 @@
 import {
   LucideArrowLeftRight,
+  LucideBanknote,
   LucideBarChart3,
   LucideBell,
   LucideBuilding2,
@@ -28,6 +29,7 @@ import {
 /** Icons registered once for the whole app and looked up by kebab-case name via `[lucideIcon]`. */
 export const APP_ICONS = [
   LucideArrowLeftRight,
+  LucideBanknote,
   LucideBarChart3,
   LucideBell,
   LucideBuilding2,

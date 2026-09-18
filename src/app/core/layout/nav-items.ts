@@ -14,6 +14,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Acuerdos', path: '/acuerdos', icon: 'handshake', implemented: true },
   { label: 'Intereses', path: '/intereses', icon: 'percent', implemented: true },
   { label: 'Cuentas de Cobro', path: '/cuentas-de-cobro', icon: 'file-text', implemented: true },
+  { label: 'Cuentas por Pagar', path: '/cuentas-por-pagar', icon: 'banknote', implemented: true },
   { label: 'Usuarios', path: '/usuarios', icon: 'users' },
   { label: 'Reportes', path: '/reportes', icon: 'bar-chart-3', implemented: true },
   { label: 'Alertas', path: '/alertas', icon: 'bell', implemented: true },
