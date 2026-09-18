@@ -9,8 +9,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Pagos', path: '/pagos', icon: 'credit-card', implemented: true },
   { label: 'Imputaciones', path: '/imputaciones', icon: 'arrow-left-right', implemented: true },
   { label: 'Liquidaciones', path: '/liquidaciones', icon: 'file-check-2', implemented: true },
-  { label: 'FONPET', path: '/fonpet', icon: 'landmark' },
-  { label: 'FONCEP', path: '/foncep', icon: 'piggy-bank' },
   { label: 'Acuerdos', path: '/acuerdos', icon: 'handshake', implemented: true },
   { label: 'Intereses', path: '/intereses', icon: 'percent', implemented: true },
   { label: 'Cuentas de Cobro', path: '/cuentas-de-cobro', icon: 'file-text', implemented: true },
