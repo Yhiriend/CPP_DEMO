@@ -32,7 +32,7 @@ export interface CuentaCobro {
   readonly capitalLabel: string;
   readonly fechaGeneracion: string;
   readonly fechaRecepcion: string | null;
-  /** CCAL-005 — Fecha de vencimiento = Fecha de recibido + 30 días calendario. */
+  /** CCAL-005 — Fecha de vencimiento = 30 días calendario desde el día hábil siguiente al recibo. */
   readonly fechaVencimiento: string | null;
   readonly historialRecepcion: readonly RegistroRecepcion[];
   readonly estado: TableBadge;

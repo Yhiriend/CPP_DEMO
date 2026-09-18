@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 import { TableBadge, TableBadgeVariant } from '../../shared/ui/table/table.model';
-import { nowTimestamp, todayIso } from '../../shared/utils/date';
+import { addDays, nowTimestamp, siguienteDiaHabil, todayIso } from '../../shared/utils/date';
 import { numeroALetras } from '../../shared/utils/numero-a-letras';
 import CUENTAS_COBRO_SEED from '../../fake_data/cuentas-cobro.json';
 import { EntidadesService } from '../entidades/entidades.service';
@@ -216,10 +216,9 @@ export class CuentasDeCobroService {
     return nueva;
   }
 
+  /** Regla temporal (Flujo_Modulo_Financiero_CPPv2): 30 días calendario a partir del día hábil siguiente al recibo. */
   private calcularVencimiento(fechaRecepcion: string): string {
-    const fecha = new Date(fechaRecepcion);
-    fecha.setDate(fecha.getDate() + DIAS_VENCIMIENTO);
-    return fecha.toISOString().slice(0, 10);
+    return addDays(siguienteDiaHabil(fechaRecepcion), DIAS_VENCIMIENTO);
   }
 
   private setEstado(idCuenta: string, estado: EstadoCuentaCobro): void {

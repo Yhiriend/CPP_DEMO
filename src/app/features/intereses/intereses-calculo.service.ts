@@ -12,20 +12,21 @@ export interface CalculoInteres {
 }
 
 /**
- * Orchestrates HU-008/HU-009: applies the DTF rate currently in force
- * (owned by Parametrización) to a capital balance and its mora start
- * date, per CCAL-006/CCAL-007. Pure math lives in shared/utils/interes;
- * this service only adds the "which DTF rate applies" lookup.
+ * Orchestrates HU-008/HU-009: aplica el histórico de tasas DTF (owned by
+ * Parametrización) a un capital y su fecha base de mora, per CCAL-006/CCAL-007.
+ * Pure math lives in shared/utils/interes; this service only adds the "which
+ * DTF rate(s) apply" lookup — el período de mora puede tocar varios meses,
+ * cada uno con su propia tasa vigente.
  */
 @Injectable({ providedIn: 'root' })
 export class InteresesCalculoService {
   private readonly parametrizacionService = inject(ParametrizacionService);
 
   calcular(capital: number, fechaBaseMora: string, fechaCorte: string = todayIso()): CalculoInteres {
-    const tasaVigente = this.parametrizacionService.getTasaVigente();
-    const tasaDtfAplicada = tasaVigente?.tasaValor ?? 0;
+    const tasasDtf = this.parametrizacionService.dtfRates();
     const diasMora = calcularDiasMora(fechaBaseMora, fechaCorte);
-    const interes = calcularInteresMora(capital, tasaDtfAplicada, diasMora);
+    const interes = calcularInteresMora(capital, tasasDtf, fechaBaseMora, fechaCorte);
+    const tasaDtfAplicada = this.parametrizacionService.getTasaVigente()?.tasaValor ?? 0;
 
     return {
       diasMora,

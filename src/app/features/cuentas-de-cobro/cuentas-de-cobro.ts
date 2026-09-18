@@ -13,7 +13,7 @@ import { Modal } from '../../shared/ui/modal/modal';
 import { Table } from '../../shared/ui/table/table';
 import { TableBadge, TableColumn } from '../../shared/ui/table/table.model';
 import { ToastService } from '../../shared/ui/toast/toast.service';
-import { todayIso } from '../../shared/utils/date';
+import { addDays, siguienteDiaHabil, todayIso } from '../../shared/utils/date';
 import { BeneficiariosService } from '../pensionados/beneficiarios.service';
 import { EntidadesService } from '../entidades/entidades.service';
 import { ImputacionesService } from '../imputaciones/imputaciones.service';
@@ -259,9 +259,7 @@ export class CuentasDeCobro {
 
   protected get previewVencimiento(): string {
     if (!this.recepcionFecha) return '—';
-    const fecha = new Date(this.recepcionFecha);
-    fecha.setDate(fecha.getDate() + 30);
-    return fecha.toISOString().slice(0, 10);
+    return addDays(siguienteDiaHabil(this.recepcionFecha), 30);
   }
 
   protected submitRecepcion(): void {
