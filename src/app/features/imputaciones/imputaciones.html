@@ -214,9 +214,9 @@
         <input
           id="impValor"
           name="impValor"
-          type="number"
-          min="0"
-          [max]="partidaMontoDisponible"
+          type="text"
+          inputmode="numeric"
+          appMoneyInput
           class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
           [(ngModel)]="formValorAImputar"
         />

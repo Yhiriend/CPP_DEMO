@@ -4,6 +4,7 @@ import { LucideDownload, LucidePlus } from '@lucide/angular';
 
 import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { Modal } from '../../shared/ui/modal/modal';
+import { MoneyInputDirective } from '../../shared/ui/money-input/money-input.directive';
 import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
 import { ToastService } from '../../shared/ui/toast/toast.service';
@@ -30,7 +31,7 @@ interface AcuerdoRow extends AcuerdoFonpet {
 
 @Component({
   selector: 'app-acuerdos',
-  imports: [Breadcrumb, Table, FormsModule, Modal, LucideDownload, LucidePlus],
+  imports: [Breadcrumb, Table, FormsModule, Modal, MoneyInputDirective, LucideDownload, LucidePlus],
   templateUrl: './acuerdos.html',
 })
 export class Acuerdos {

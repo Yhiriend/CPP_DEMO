@@ -5,6 +5,7 @@ import { LucideDownload } from '@lucide/angular';
 
 import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { Modal } from '../../shared/ui/modal/modal';
+import { MoneyInputDirective } from '../../shared/ui/money-input/money-input.directive';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { StatCardData } from '../../shared/ui/stat-card/stat-card.model';
 import { Table } from '../../shared/ui/table/table';
@@ -48,7 +49,7 @@ const REVERSADA_BADGE: TableBadge = { label: 'Reversada', variant: 'danger' };
 
 @Component({
   selector: 'app-imputaciones',
-  imports: [Breadcrumb, StatCard, Table, FormsModule, Modal, DecimalPipe, LucideDownload],
+  imports: [Breadcrumb, StatCard, Table, FormsModule, Modal, MoneyInputDirective, DecimalPipe, LucideDownload],
   templateUrl: './imputaciones.html',
 })
 export class Imputaciones {

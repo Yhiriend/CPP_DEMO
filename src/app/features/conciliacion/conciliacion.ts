@@ -4,6 +4,7 @@ import { LucideDownload, LucidePlus } from '@lucide/angular';
 
 import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { Modal } from '../../shared/ui/modal/modal';
+import { MoneyInputDirective } from '../../shared/ui/money-input/money-input.directive';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { StatCardData } from '../../shared/ui/stat-card/stat-card.model';
 import { Table } from '../../shared/ui/table/table';
@@ -23,7 +24,7 @@ import {
 
 @Component({
   selector: 'app-conciliacion',
-  imports: [Breadcrumb, StatCard, Table, FormsModule, Modal, LucideDownload, LucidePlus],
+  imports: [Breadcrumb, StatCard, Table, FormsModule, Modal, MoneyInputDirective, LucideDownload, LucidePlus],
   templateUrl: './conciliacion.html',
 })
 export class ConciliacionPage {

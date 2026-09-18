@@ -7,6 +7,7 @@ import { Breadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 import { BulkUploadDialog } from '../../shared/ui/bulk-upload-dialog/bulk-upload-dialog';
 import { BulkUploadOutcome } from '../../shared/ui/bulk-upload-dialog/bulk-upload-dialog.model';
 import { Modal } from '../../shared/ui/modal/modal';
+import { MoneyInputDirective } from '../../shared/ui/money-input/money-input.directive';
 import { Table } from '../../shared/ui/table/table';
 import { TableColumn } from '../../shared/ui/table/table.model';
 import { ToastService } from '../../shared/ui/toast/toast.service';
@@ -29,7 +30,7 @@ interface LiquidacionRow extends Liquidacion {
 
 @Component({
   selector: 'app-liquidaciones',
-  imports: [Breadcrumb, Table, FormsModule, Modal, BulkUploadDialog, LucidePlus, LucideUpload],
+  imports: [Breadcrumb, Table, FormsModule, Modal, MoneyInputDirective, BulkUploadDialog, LucidePlus, LucideUpload],
   templateUrl: './liquidaciones.html',
 })
 export class Liquidaciones {
