@@ -1,0 +1,63 @@
+[
+  {
+    "id": "CON-2026-001",
+    "fuente": "SIIF",
+    "periodo": "2026-09",
+    "entidadId": null,
+    "entidad": "Todas las entidades",
+    "valorReportado": 168400000,
+    "valorReportadoLabel": "$168,400,000",
+    "valorInterno": 168400000,
+    "valorInternoLabel": "$168,400,000",
+    "diferencia": 0,
+    "diferenciaLabel": "$0",
+    "soporte": { "nombreArchivo": "siif-recaudo-2026-09.xlsx", "fechaCargue": "2026-09-16" },
+    "estado": { "label": "Conciliado", "variant": "success" },
+    "fechaGeneracion": "2026-09-16",
+    "generadoPor": "admin@sgdp.gov.co",
+    "ajuste": null
+  },
+  {
+    "id": "CON-2026-002",
+    "fuente": "Bancos",
+    "periodo": "2026-09",
+    "entidadId": null,
+    "entidad": "Todas las entidades",
+    "valorReportado": 165000000,
+    "valorReportadoLabel": "$165,000,000",
+    "valorInterno": 168400000,
+    "valorInternoLabel": "$168,400,000",
+    "diferencia": -3400000,
+    "diferenciaLabel": "-$3,400,000",
+    "soporte": { "nombreArchivo": "extracto-bancario-2026-09.xlsx", "fechaCargue": "2026-09-17" },
+    "estado": { "label": "Con Diferencia", "variant": "danger" },
+    "fechaGeneracion": "2026-09-17",
+    "generadoPor": "admin@sgdp.gov.co",
+    "ajuste": null
+  },
+  {
+    "id": "CON-2026-003",
+    "fuente": "FOPEP",
+    "periodo": "2026-08",
+    "entidadId": "gobernacion-de-ejemplo",
+    "entidad": "Gobernación de Ejemplo",
+    "valorReportado": 14500000,
+    "valorReportadoLabel": "$14,500,000",
+    "valorInterno": 15000000,
+    "valorInternoLabel": "$15,000,000",
+    "diferencia": -500000,
+    "diferenciaLabel": "-$500,000",
+    "soporte": { "nombreArchivo": "fopep-desembolsos-2026-08.xlsx", "fechaCargue": "2026-08-28" },
+    "estado": { "label": "Ajustada", "variant": "info" },
+    "fechaGeneracion": "2026-08-28",
+    "generadoPor": "admin@sgdp.gov.co",
+    "ajuste": {
+      "tipo": "Nota Débito",
+      "valor": 500000,
+      "valorLabel": "$500,000",
+      "justificacion": "Comisión de giro descontada por FOPEP que no se había registrado internamente.",
+      "fecha": "2026-08-29",
+      "registradoPor": "admin@sgdp.gov.co"
+    }
+  }
+]

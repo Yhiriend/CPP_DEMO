@@ -1,0 +1,333 @@
+<div class="space-y-6">
+  <app-breadcrumb [items]="['SGDP', 'Conciliación']" />
+
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900">Conciliación Financiera y Contable</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Compara lo que SIIF, FOPEP, PASIVOCOL o el banco reportan para un período contra lo que SCPP ya tiene
+      registrado, y deja trazado el ajuste (nota débito/crédito) cuando hay diferencia.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-stat-card [stat]="kpi" />
+    }
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4">
+    <span class="text-sm font-medium text-slate-600">Filtros:</span>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterFuente"
+    >
+      <option value="">Todas las fuentes</option>
+      @for (fuente of fuentes; track fuente) {
+        <option [value]="fuente">{{ fuente }}</option>
+      }
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEstado"
+    >
+      <option value="">Cualquier estado</option>
+      <option value="Conciliado">Conciliado</option>
+      <option value="Con Diferencia">Con Diferencia</option>
+      <option value="Ajustada">Ajustada</option>
+    </select>
+    <select
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:border-slate-400 focus:outline-none"
+      [(ngModel)]="filterEntidadId"
+    >
+      <option value="">Todas las entidades</option>
+      @for (entidad of entidades(); track entidad.id) {
+        <option [value]="entidad.id">{{ entidad.nombre }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+      (click)="buscar()"
+    >
+      Buscar
+    </button>
+    <span class="ml-auto text-xs font-medium text-slate-400">{{ filteredConciliaciones().length }} registros</span>
+  </div>
+
+  <app-table title="Conciliaciones" [columns]="columns" [rows]="filteredConciliaciones()">
+    <div table-actions class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="exportar()"
+      >
+        <svg lucideDownload class="h-4 w-4"></svg>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="openFormModal()"
+      >
+        <svg lucidePlus class="h-4 w-4"></svg>
+        Registrar Conciliación
+      </button>
+    </div>
+
+    <ng-template #rowActions let-row>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="verDetalle(row)"
+      >
+        Ver
+      </button>
+    </ng-template>
+  </app-table>
+</div>
+
+@if (showFormModal()) {
+  <app-modal title="Registrar Conciliación" (close)="showFormModal.set(false)">
+    <div modal-body class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="conFuente" class="mb-1.5 block text-sm font-medium text-slate-700">Fuente*</label>
+          <select
+            id="conFuente"
+            name="conFuente"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formFuente"
+          >
+            @for (fuente of fuentes; track fuente) {
+              <option [value]="fuente">{{ fuente }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="conPeriodo" class="mb-1.5 block text-sm font-medium text-slate-700">Período*</label>
+          <input
+            id="conPeriodo"
+            name="conPeriodo"
+            type="month"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="formPeriodo"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="conEntidad" class="mb-1.5 block text-sm font-medium text-slate-700">Entidad (opcional)</label>
+        <select
+          id="conEntidad"
+          name="conEntidad"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formEntidadId"
+        >
+          <option value="">Todas las entidades</option>
+          @for (entidad of entidades(); track entidad.id) {
+            <option [value]="entidad.id">{{ entidad.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="conValor" class="mb-1.5 block text-sm font-medium text-slate-700">Valor Reportado por la Fuente*</label>
+        <input
+          id="conValor"
+          name="conValor"
+          type="number"
+          min="0"
+          placeholder="0"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="formValorReportado"
+        />
+      </div>
+
+      <div class="rounded-lg bg-slate-50 px-4 py-3 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Valor Interno (SCPP)</span>
+          <span class="font-semibold text-slate-900">{{ previewValorInternoLabel }}</span>
+        </div>
+        <div class="mt-1 flex items-center justify-between">
+          <span class="text-slate-500">Diferencia</span>
+          <span class="font-semibold text-slate-900">{{ previewDiferenciaLabel }}</span>
+        </div>
+      </div>
+
+      <div>
+        <label for="conSoporte" class="mb-1.5 block text-sm font-medium text-slate-700">Soporte Documental (XLSX)</label>
+        <input
+          id="conSoporte"
+          name="conSoporte"
+          type="file"
+          accept=".xlsx"
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium focus:border-slate-400 focus:outline-none"
+          (change)="onSoporteSelected($event)"
+        />
+        @if (formSoporteNombre) {
+          <p class="mt-1.5 text-xs text-emerald-600">{{ formSoporteNombre }}</p>
+        }
+      </div>
+
+      @if (formError) {
+        <p class="text-sm font-medium text-red-600">{{ formError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showFormModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitForm()"
+      >
+        Registrar Conciliación
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (showDetalleModal() && detalleConciliacion(); as conciliacion) {
+  <app-modal [title]="'Conciliación ' + conciliacion.id" (close)="showDetalleModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Fuente</p>
+          <p class="font-medium text-slate-900">{{ conciliacion.fuente }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Período</p>
+          <p class="font-medium text-slate-900">{{ conciliacion.periodo }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Entidad</p>
+          <p class="font-medium text-slate-900">{{ conciliacion.entidad }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Estado</p>
+          <p class="font-medium text-slate-900">{{ conciliacion.estado.label }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-1 rounded-lg bg-slate-50 px-4 py-3">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Valor Reportado ({{ conciliacion.fuente }})</span>
+          <span class="font-semibold text-slate-900">{{ conciliacion.valorReportadoLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Valor Interno (SCPP)</span>
+          <span class="font-semibold text-slate-900">{{ conciliacion.valorInternoLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between border-t border-slate-200 pt-1">
+          <span class="text-slate-500">Diferencia</span>
+          <span class="font-semibold text-slate-900">{{ conciliacion.diferenciaLabel }}</span>
+        </div>
+      </div>
+
+      @if (conciliacion.ajuste; as ajuste) {
+        <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+          <p class="text-sm font-semibold text-blue-700">{{ ajuste.tipo }} — {{ ajuste.valorLabel }}</p>
+          <p class="mt-1 text-xs text-blue-600">{{ ajuste.justificacion }}</p>
+          <p class="mt-1 text-xs text-blue-500">{{ ajuste.registradoPor }} · {{ ajuste.fecha }}</p>
+        </div>
+      }
+
+      <p class="text-xs text-slate-400">
+        Soporte: {{ conciliacion.soporte?.nombreArchivo ?? '—' }} · Generado por {{ conciliacion.generadoPor }}.
+      </p>
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showDetalleModal.set(false)"
+      >
+        Cerrar
+      </button>
+      @if (conciliacion.estado.label === 'Con Diferencia') {
+        <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          (click)="openAjusteModal()"
+        >
+          Registrar Ajuste
+        </button>
+      }
+    </div>
+  </app-modal>
+}
+
+@if (showAjusteModal() && detalleConciliacion(); as conciliacion) {
+  <app-modal [title]="'Ajuste — ' + conciliacion.id" (close)="showAjusteModal.set(false)">
+    <div modal-body class="space-y-4 text-sm">
+      <p class="text-slate-600">
+        La diferencia de esta conciliación es <b>{{ conciliacion.diferenciaLabel }}</b>. El ajuste queda registrado
+        como trazabilidad contable; no modifica ningún saldo de Cartera o Pagos.
+      </p>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="ajusteTipo" class="mb-1.5 block text-sm font-medium text-slate-700">Tipo*</label>
+          <select
+            id="ajusteTipo"
+            name="ajusteTipo"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="ajusteTipo"
+          >
+            @for (tipo of tiposAjuste; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="ajusteValor" class="mb-1.5 block text-sm font-medium text-slate-700">Valor*</label>
+          <input
+            id="ajusteValor"
+            name="ajusteValor"
+            type="number"
+            min="0"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:border-slate-400 focus:outline-none"
+            [(ngModel)]="ajusteValor"
+          />
+        </div>
+      </div>
+      <div>
+        <label for="ajusteJust" class="mb-1.5 block text-sm font-medium text-slate-700">Justificación*</label>
+        <textarea
+          id="ajusteJust"
+          name="ajusteJust"
+          rows="3"
+          placeholder="Ej. Comisión bancaria no registrada internamente."
+          class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+          [(ngModel)]="ajusteJustificacion"
+        ></textarea>
+      </div>
+      @if (ajusteError) {
+        <p class="text-sm font-medium text-red-600">{{ ajusteError }}</p>
+      }
+    </div>
+
+    <div modal-footer class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+        (click)="showAjusteModal.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        (click)="submitAjuste()"
+      >
+        Registrar Ajuste
+      </button>
+    </div>
+  </app-modal>
+}

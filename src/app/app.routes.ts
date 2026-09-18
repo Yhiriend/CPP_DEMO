@@ -74,6 +74,11 @@ export const routes: Routes = [
         path: 'alertas',
         loadChildren: () => import('./features/alertas/alertas.routes').then((m) => m.ALERTAS_ROUTES),
       },
+      {
+        path: 'conciliacion',
+        loadChildren: () =>
+          import('./features/conciliacion/conciliacion.routes').then((m) => m.CONCILIACION_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
